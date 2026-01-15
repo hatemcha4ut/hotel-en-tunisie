@@ -383,41 +383,51 @@ export function BookingPage({ hotel, room, onBack, onComplete }: BookingPageProp
                 </Card>
 
                 {!currentUser && accountChoice === null && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Compte utilisateur</CardTitle>
+                  <Card className="border-2 border-primary/20 shadow-lg">
+                    <CardHeader className="space-y-2 pb-4">
+                      <CardTitle className="text-lg sm:text-xl">Comment souhaitez-vous continuer ?</CardTitle>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        Choisissez une option pour finaliser votre réservation
+                      </p>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Créez un compte pour suivre vos réservations ou continuez en tant que visiteur
-                      </p>
                       <Button 
                         variant="outline" 
-                        className="w-full justify-start gap-3 h-auto py-3 px-3 sm:py-4 sm:px-4"
+                        className="w-full justify-start gap-3 sm:gap-4 h-auto py-4 px-3 sm:px-4 border-2 hover:border-primary hover:bg-primary/5 transition-all"
                         onClick={handleCreateAccount}
                       >
-                        <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                          <UserPlus size={20} className="text-primary sm:w-6 sm:h-6" />
+                        <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                          <UserPlus className="text-primary w-6 h-6 sm:w-7 sm:h-7" weight="duotone" />
                         </div>
                         <div className="text-left flex-1 min-w-0">
-                          <div className="font-semibold text-sm sm:text-base">Créer un compte</div>
-                          <div className="text-xs text-muted-foreground break-words leading-relaxed">
-                            Suivez vos réservations et bénéficiez d'offres exclusives
+                          <div className="font-semibold text-sm sm:text-base mb-1">Créer un compte</div>
+                          <div className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                            Accédez à vos réservations et offres exclusives
                           </div>
                         </div>
                       </Button>
+                      
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <Separator />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-card px-2 text-muted-foreground">Ou</span>
+                        </div>
+                      </div>
+                      
                       <Button 
                         variant="outline" 
-                        className="w-full justify-start gap-3 h-auto py-3 px-3 sm:py-4 sm:px-4"
+                        className="w-full justify-start gap-3 sm:gap-4 h-auto py-4 px-3 sm:px-4 border-2 hover:border-accent hover:bg-accent/5 transition-all"
                         onClick={handleContinueAsGuest}
                       >
-                        <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-accent/10 flex items-center justify-center">
-                          <User size={20} className="text-accent sm:w-6 sm:h-6" />
+                        <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-accent/10 flex items-center justify-center">
+                          <User className="text-accent w-6 h-6 sm:w-7 sm:h-7" weight="duotone" />
                         </div>
                         <div className="text-left flex-1 min-w-0">
-                          <div className="font-semibold text-sm sm:text-base">Continuer en tant que visiteur</div>
-                          <div className="text-xs text-muted-foreground break-words leading-relaxed">
-                            Réservez sans créer de compte
+                          <div className="font-semibold text-sm sm:text-base mb-1">Continuer en visiteur</div>
+                          <div className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                            Réservez rapidement sans compte
                           </div>
                         </div>
                       </Button>

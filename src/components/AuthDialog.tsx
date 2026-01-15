@@ -88,133 +88,152 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         {step === 'auth' ? (
           <>
-            <DialogHeader>
-              <DialogTitle>Connexion / Inscription</DialogTitle>
+            <DialogHeader className="space-y-3">
+              <DialogTitle className="text-xl sm:text-2xl">Bienvenue</DialogTitle>
+              <p className="text-sm text-muted-foreground">Connectez-vous ou créez un compte pour continuer</p>
             </DialogHeader>
 
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Se connecter</TabsTrigger>
-                <TabsTrigger value="register">S'enregistrer</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 h-11">
+                <TabsTrigger value="login" className="text-sm sm:text-base">Se connecter</TabsTrigger>
+                <TabsTrigger value="register" className="text-sm sm:text-base">S'enregistrer</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="login" className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
-                  <Input
-                    id="login-email"
-                    type="email"
-                    placeholder="votre@email.com"
-                    value={loginData.email}
-                    onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                  />
+              <TabsContent value="login" className="space-y-4 mt-6">
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
+                    <Input
+                      id="login-email"
+                      type="email"
+                      placeholder="votre@email.com"
+                      value={loginData.email}
+                      onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                      className="h-11"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="login-password" className="text-sm font-medium">Mot de passe</Label>
+                    <Input
+                      id="login-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={loginData.password}
+                      onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                      className="h-11"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="login-password">Mot de passe</Label>
-                  <Input
-                    id="login-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={loginData.password}
-                    onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                  />
+                
+                <div className="text-right">
+                  <button className="text-sm text-primary hover:underline">
+                    Mot de passe oublié?
+                  </button>
                 </div>
-                <Button className="w-full" onClick={handleLogin}>
+                
+                <Button className="w-full h-11" size="lg" onClick={handleLogin}>
                   Se connecter
                 </Button>
-                <div className="text-center text-sm">
-                  <a href="#" className="text-primary hover:underline">
-                    Mot de passe oublié?
-                  </a>
-                </div>
               </TabsContent>
 
-              <TabsContent value="register" className="space-y-4 mt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">Prénom *</Label>
-                    <Input
-                      id="firstName"
-                      placeholder="Prénom"
-                      value={registerData.firstName}
-                      onChange={(e) => setRegisterData({ ...registerData, firstName: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Nom *</Label>
-                    <Input
-                      id="lastName"
-                      placeholder="Nom"
-                      value={registerData.lastName}
-                      onChange={(e) => setRegisterData({ ...registerData, lastName: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="register-email">Email *</Label>
-                  <Input
-                    id="register-email"
-                    type="email"
-                    placeholder="votre@email.com"
-                    value={registerData.email}
-                    onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Téléphone *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="+216 XX XXX XXX"
-                    value={registerData.phone}
-                    onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="register-password">Mot de passe *</Label>
-                  <Input
-                    id="register-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={registerData.password}
-                    onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirmer le mot de passe *</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={registerData.confirmPassword}
-                    onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
-                  />
-                </div>
-
+              <TabsContent value="register" className="space-y-4 mt-6">
                 <div className="space-y-3">
-                  <Label>Méthode de vérification</Label>
-                  <RadioGroup value={verificationMethod} onValueChange={(v) => setVerificationMethod(v as 'email' | 'whatsapp')}>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="email" id="email" />
-                      <Label htmlFor="email" className="flex items-center gap-2 cursor-pointer">
-                        <Envelope size={18} />
-                        Email
-                      </Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName" className="text-sm font-medium">Prénom *</Label>
+                      <Input
+                        id="firstName"
+                        placeholder="Prénom"
+                        value={registerData.firstName}
+                        onChange={(e) => setRegisterData({ ...registerData, firstName: e.target.value })}
+                        className="h-11"
+                      />
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="whatsapp" id="whatsapp" />
-                      <Label htmlFor="whatsapp" className="flex items-center gap-2 cursor-pointer">
-                        <Phone size={18} />
-                        WhatsApp
-                      </Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName" className="text-sm font-medium">Nom *</Label>
+                      <Input
+                        id="lastName"
+                        placeholder="Nom"
+                        value={registerData.lastName}
+                        onChange={(e) => setRegisterData({ ...registerData, lastName: e.target.value })}
+                        className="h-11"
+                      />
                     </div>
-                  </RadioGroup>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="register-email" className="text-sm font-medium">Email *</Label>
+                    <Input
+                      id="register-email"
+                      type="email"
+                      placeholder="votre@email.com"
+                      value={registerData.email}
+                      onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
+                      className="h-11"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-sm font-medium">Téléphone *</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+216 XX XXX XXX"
+                      value={registerData.phone}
+                      onChange={(e) => setRegisterData({ ...registerData, phone: e.target.value })}
+                      className="h-11"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="register-password" className="text-sm font-medium">Mot de passe *</Label>
+                    <Input
+                      id="register-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={registerData.password}
+                      onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                      className="h-11"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password" className="text-sm font-medium">Confirmer le mot de passe *</Label>
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={registerData.confirmPassword}
+                      onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
+                      className="h-11"
+                    />
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <Label className="text-sm font-medium">Méthode de vérification</Label>
+                    <RadioGroup value={verificationMethod} onValueChange={(v) => setVerificationMethod(v as 'email' | 'whatsapp')}>
+                      <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer">
+                        <RadioGroupItem value="email" id="email" />
+                        <Label htmlFor="email" className="flex items-center gap-2 cursor-pointer flex-1">
+                          <Envelope size={20} className="text-primary" weight="duotone" />
+                          <span className="text-sm">Email</span>
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer">
+                        <RadioGroupItem value="whatsapp" id="whatsapp" />
+                        <Label htmlFor="whatsapp" className="flex items-center gap-2 cursor-pointer flex-1">
+                          <Phone size={20} className="text-accent" weight="duotone" />
+                          <span className="text-sm">WhatsApp</span>
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
                 </div>
 
-                <Button className="w-full" onClick={handleRegister}>
+                <Button className="w-full h-11" size="lg" onClick={handleRegister}>
                   S'enregistrer
                 </Button>
               </TabsContent>
@@ -223,33 +242,35 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Vérification</DialogTitle>
+              <DialogTitle className="text-xl sm:text-2xl">Vérification du code</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <div className="text-center py-4">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <LockKey size={32} className="text-primary" />
+            <div className="space-y-6">
+              <div className="text-center py-6">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <LockKey size={40} className="text-primary" weight="duotone" />
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Un code de vérification a été envoyé {verificationMethod === 'email' ? 'à votre email' : 'via WhatsApp'}
+                  Un code de vérification à 6 chiffres a été envoyé<br />
+                  {verificationMethod === 'email' ? 'à votre adresse email' : 'via WhatsApp'}
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="code">Code de vérification (6 chiffres)</Label>
+                <Label htmlFor="code" className="text-sm font-medium">Code de vérification</Label>
                 <Input
                   id="code"
                   placeholder="000000"
                   maxLength={6}
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                  className="h-12 text-center text-xl tracking-widest font-semibold"
                 />
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setStep('auth')} className="flex-1">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button variant="outline" onClick={() => setStep('auth')} className="flex-1 h-11">
                   Retour
                 </Button>
-                <Button onClick={handleVerify} className="flex-1" disabled={verificationCode.length !== 6}>
-                  Vérifier
+                <Button onClick={handleVerify} className="flex-1 h-11" disabled={verificationCode.length !== 6}>
+                  Vérifier le code
                 </Button>
               </div>
             </div>
