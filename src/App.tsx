@@ -8,9 +8,12 @@ import { SearchResultsPage } from '@/pages/SearchResultsPage'
 import { HotelDetailsPage } from '@/pages/HotelDetailsPage'
 import { BookingPage } from '@/pages/BookingPage'
 import { ConfirmationPage } from '@/pages/ConfirmationPage'
+import { ContactPage } from '@/pages/ContactPage'
+import { TermsPage } from '@/pages/TermsPage'
+import { PrivacyPage } from '@/pages/PrivacyPage'
 import { Hotel, Room } from '@/types'
 
-type Page = 'home' | 'search' | 'hotel' | 'booking' | 'confirmation'
+type Page = 'home' | 'search' | 'hotel' | 'booking' | 'confirmation' | 'contact' | 'terms' | 'privacy'
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home')
@@ -45,6 +48,10 @@ function App() {
     setSelectedHotel(null)
     setSelectedRoom(null)
     setBookingReference('')
+  }
+
+  const handleNavigateToPage = (page: string) => {
+    setCurrentPage(page as Page)
   }
 
   return (
@@ -98,9 +105,15 @@ function App() {
               onHome={handleBackToHome}
             />
           )}
+          
+          {currentPage === 'contact' && <ContactPage />}
+          
+          {currentPage === 'terms' && <TermsPage />}
+          
+          {currentPage === 'privacy' && <PrivacyPage />}
         </main>
         
-        {currentPage !== 'confirmation' && <Footer />}
+        {currentPage !== 'confirmation' && <Footer onNavigate={handleNavigateToPage} />}
       </div>
       
       <Toaster position="top-right" richColors />

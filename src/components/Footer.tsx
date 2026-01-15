@@ -1,6 +1,17 @@
 import hotelCitiesLogo from '@/assets/images/hotel-cities-logo.svg'
 
-export function Footer() {
+interface FooterProps {
+  onNavigate?: (page: string) => void
+}
+
+export function Footer({ onNavigate }: FooterProps) {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, page: string) => {
+    if (onNavigate) {
+      e.preventDefault()
+      onNavigate(page)
+    }
+  }
+
   return (
     <footer className="bg-foreground text-background py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -20,27 +31,57 @@ export function Footer() {
               <li><a href="#hotels" className="hover:text-background transition-colors">Hôtels</a></li>
               <li><a href="#destinations" className="hover:text-background transition-colors">Destinations</a></li>
               <li><a href="#deals" className="hover:text-background transition-colors">Offres</a></li>
-              <li><a href="#about" className="hover:text-background transition-colors">À propos</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Assistance</h4>
+            <h4 className="font-semibold mb-4">Informations Légales</h4>
             <ul className="space-y-2 text-sm text-background/80">
-              <li><a href="#faq" className="hover:text-background transition-colors">FAQ</a></li>
-              <li><a href="#contact" className="hover:text-background transition-colors">Contact</a></li>
-              <li><a href="#terms" className="hover:text-background transition-colors">Conditions</a></li>
-              <li><a href="#privacy" className="hover:text-background transition-colors">Confidentialité</a></li>
+              <li>
+                <a 
+                  href="#contact" 
+                  className="hover:text-background transition-colors cursor-pointer"
+                  onClick={(e) => handleClick(e, 'contact')}
+                >
+                  Contact
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#terms" 
+                  className="hover:text-background transition-colors cursor-pointer"
+                  onClick={(e) => handleClick(e, 'terms')}
+                >
+                  Conditions Générales
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="#privacy" 
+                  className="hover:text-background transition-colors cursor-pointer"
+                  onClick={(e) => handleClick(e, 'privacy')}
+                >
+                  Politique de Confidentialité
+                </a>
+              </li>
             </ul>
           </div>
 
           <div>
             <h4 className="font-semibold mb-4">Contact</h4>
             <ul className="space-y-2 text-sm text-background/80">
-              <li>Email: resamericantours@gmail.com</li>
-              <li>Tel / WA Business: +216 51 613 888</li>
-              <li>Address: American Tours HQ</li>
-              <li>Tunisia</li>
+              <li>
+                <a href="mailto:resamericantours@gmail.com" className="hover:text-background transition-colors">
+                  resamericantours@gmail.com
+                </a>
+              </li>
+              <li>
+                <a href="tel:+21651613888" className="hover:text-background transition-colors">
+                  +216 51 613 888
+                </a>
+              </li>
+              <li>Tel / WA Business</li>
+              <li>American Tours HQ, Tunisia</li>
             </ul>
           </div>
         </div>
