@@ -288,10 +288,11 @@ export const api = {
       }
     }
     
-    if (params.hotelName) {
-      const searchTerm = params.hotelName.toLowerCase()
+    if (params.hotelName && params.hotelName.trim() !== '') {
+      const searchTerm = params.hotelName.toLowerCase().trim()
       filtered = filtered.filter(h => 
-        h.name.toLowerCase().includes(searchTerm)
+        h.name.toLowerCase().includes(searchTerm) ||
+        h.city.toLowerCase().includes(searchTerm)
       )
     }
     

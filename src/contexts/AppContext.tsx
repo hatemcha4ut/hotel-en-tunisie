@@ -12,6 +12,8 @@ const AppContext = createContext<AppContextType | undefined>(undefined)
 
 const defaultSearchParams: SearchParams = {
   searchMode: 'city',
+  cityId: undefined,
+  hotelName: undefined,
   checkIn: null,
   checkOut: null,
   adults: 2,

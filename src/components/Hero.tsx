@@ -55,6 +55,16 @@ export function SearchWidget({ onSearch }: SearchWidgetProps) {
     })
   }
 
+  const handleSearch = () => {
+    if (searchParams.searchMode === 'city' && !searchParams.cityId) {
+      return
+    }
+    if (searchParams.searchMode === 'hotel' && (!searchParams.hotelName || searchParams.hotelName.trim() === '')) {
+      return
+    }
+    onSearch()
+  }
+
   const guestsText = `${searchParams.adults} ${searchParams.adults > 1 ? 'adultes' : 'adulte'}${
     searchParams.children.length > 0 ? `, ${searchParams.children.length} ${searchParams.children.length > 1 ? 'enfants' : 'enfant'}` : ''
   }`
@@ -64,14 +74,14 @@ export function SearchWidget({ onSearch }: SearchWidgetProps) {
       <div className="flex items-center gap-2 mb-6">
         <Button
           variant={searchParams.searchMode === 'city' ? 'default' : 'outline'}
-          onClick={() => setSearchParams({ ...searchParams, searchMode: 'city' })}
+          onClick={() => setSearchParams({ ...searchParams, searchMode: 'city', hotelName: undefined })}
           className="flex-1"
         >
           {t('search.searchByCity', language)}
         </Button>
         <Button
           variant={searchParams.searchMode === 'hotel' ? 'default' : 'outline'}
-          onClick={() => setSearchParams({ ...searchParams, searchMode: 'hotel' })}
+          onClick={() => setSearchParams({ ...searchParams, searchMode: 'hotel', cityId: undefined })}
           className="flex-1"
         >
           {t('search.searchByHotel', language)}
@@ -252,7 +262,7 @@ export function SearchWidget({ onSearch }: SearchWidgetProps) {
         </div>
       </div>
 
-      <Button size="lg" className="w-full mt-6" onClick={onSearch}>
+      <Button size="lg" className="w-full mt-6" onClick={handleSearch}>
         <MagnifyingGlass size={20} className="mr-2" />
         {t('search.searchHotels', language)}
       </Button>
