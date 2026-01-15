@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Hero } from '@/components/Hero'
 import { FeaturedDestinations } from '@/components/FeaturedDestinations'
 import { WhyBookWithUs } from '@/components/WhyBookWithUs'
+import { DealsSection } from '@/components/DealsSection'
 import { HotelCard } from '@/components/HotelCard'
 import { api } from '@/lib/api'
 import { Hotel } from '@/types'
@@ -34,6 +35,7 @@ export function HomePage({ onSearch, onViewHotel }: HomePageProps) {
     <div>
       <Hero onSearch={onSearch} />
       <FeaturedDestinations />
+      <DealsSection onViewHotel={onViewHotel} />
       <WhyBookWithUs />
       
       <section className="py-16 bg-background" id="hotels">

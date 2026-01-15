@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Star, MapPin } from '@phosphor-icons/react'
+import { Star, MapPin, Tag } from '@phosphor-icons/react'
 import { Hotel } from '@/types'
 import { t } from '@/lib/translations'
 import { useApp } from '@/contexts/AppContext'
@@ -23,6 +23,12 @@ export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
           className="w-full h-full object-cover"
           loading="lazy"
         />
+        {hotel.promotion && (
+          <Badge className="absolute top-3 left-3 bg-destructive text-destructive-foreground flex items-center gap-1">
+            <Tag size={14} weight="fill" />
+            -{hotel.promotion.discount}%
+          </Badge>
+        )}
         <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground">
           <Star size={14} weight="fill" className="mr-1" />
           {hotel.stars} étoiles
@@ -60,9 +66,20 @@ export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
         <div className="flex items-center justify-between pt-4 border-t border-border">
           <div>
             <div className="text-sm text-muted-foreground">{t('common.from', language)}</div>
-            <div className="text-2xl font-bold text-primary">
-              {hotel.price} <span className="text-sm font-normal">{t('common.currency', language)}</span>
-            </div>
+            {hotel.promotion ? (
+              <div>
+                <div className="text-sm line-through text-muted-foreground">
+                  {hotel.promotion.originalPrice} {t('common.currency', language)}
+                </div>
+                <div className="text-2xl font-bold text-destructive">
+                  {hotel.price} <span className="text-sm font-normal">{t('common.currency', language)}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="text-2xl font-bold text-primary">
+                {hotel.price} <span className="text-sm font-normal">{t('common.currency', language)}</span>
+              </div>
+            )}
             <div className="text-xs text-muted-foreground">{t('common.perNight', language)}</div>
           </div>
           <Button onClick={() => onViewDetails(hotel.id)}>

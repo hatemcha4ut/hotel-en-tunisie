@@ -14,6 +14,12 @@ export interface Hotel {
   boardingType: string[]
   latitude?: number
   longitude?: number
+  promotion?: {
+    discount: number
+    label: string
+    validUntil: string
+    originalPrice: number
+  }
 }
 
 export interface City {

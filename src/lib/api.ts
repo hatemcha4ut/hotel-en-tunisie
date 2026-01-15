@@ -34,11 +34,17 @@ const mockHotels: Hotel[] = [
       'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800&h=600&fit=crop',
     ],
-    price: 280,
+    price: 224,
     amenities: ['WiFi', 'Piscine', 'Spa', 'Restaurant', 'Bar', 'Plage privée', 'Salle de sport', 'Parking'],
     boardingType: ['Petit-déjeuner', 'Demi-pension', 'Pension complète', 'All Inclusive'],
     latitude: 36.4,
     longitude: 10.62,
+    promotion: {
+      discount: 20,
+      label: 'Offre Spéciale Été',
+      validUntil: '31 Août 2024',
+      originalPrice: 280
+    }
   },
   {
     id: '2',
@@ -55,11 +61,17 @@ const mockHotels: Hotel[] = [
       'https://images.unsplash.com/photo-1568084680786-a84f91d1153c?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&h=600&fit=crop',
     ],
-    price: 320,
+    price: 256,
     amenities: ['WiFi', 'Piscine', 'Spa', 'Restaurant', 'Club enfants', 'Plage privée', 'Tennis'],
     boardingType: ['Petit-déjeuner', 'Demi-pension', 'All Inclusive'],
     latitude: 35.895,
     longitude: 10.605,
+    promotion: {
+      discount: 20,
+      label: 'Réservez tôt et économisez',
+      validUntil: '30 Septembre 2024',
+      originalPrice: 320
+    }
   },
   {
     id: '3',
@@ -96,11 +108,17 @@ const mockHotels: Hotel[] = [
       'https://images.unsplash.com/photo-1596436889106-be35e843f974?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1602002418816-5c0aeef426aa?w=800&h=600&fit=crop',
     ],
-    price: 245,
+    price: 196,
     amenities: ['WiFi', 'Piscine', 'Spa', 'Restaurant', 'Bar', 'Plage privée', 'Club enfants', 'Animation'],
     boardingType: ['Demi-pension', 'Pension complète', 'All Inclusive'],
     latitude: 33.8076,
     longitude: 10.8451,
+    promotion: {
+      discount: 20,
+      label: 'Séjour Famille - 20% Off',
+      validUntil: '15 Septembre 2024',
+      originalPrice: 245
+    }
   },
   {
     id: '5',
@@ -116,11 +134,17 @@ const mockHotels: Hotel[] = [
       'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1562790351-d273a961e0e9?w=800&h=600&fit=crop',
     ],
-    price: 210,
+    price: 168,
     amenities: ['WiFi', 'Piscine', 'Parc aquatique', 'Restaurant', 'Club enfants', 'Plage', 'Animation', 'Salle de sport'],
     boardingType: ['All Inclusive'],
     latitude: 35.7753,
     longitude: 10.8263,
+    promotion: {
+      discount: 20,
+      label: 'Vacances d\'été All Inclusive',
+      validUntil: '31 Août 2024',
+      originalPrice: 210
+    }
   },
   {
     id: '6',
@@ -156,11 +180,17 @@ const mockHotels: Hotel[] = [
       'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop',
       'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800&h=600&fit=crop',
     ],
-    price: 265,
+    price: 212,
     amenities: ['WiFi', 'Piscine', 'Spa', 'Restaurant', 'Thalasso', 'Plage privée', 'Salle de sport'],
     boardingType: ['Petit-déjeuner', 'Demi-pension', 'Pension complète', 'All Inclusive'],
     latitude: 36.4,
     longitude: 10.6,
+    promotion: {
+      discount: 20,
+      label: 'Cure Thalasso Spéciale',
+      validUntil: '30 Septembre 2024',
+      originalPrice: 265
+    }
   },
   {
     id: '8',
@@ -297,6 +327,11 @@ export const api = {
     }
     
     return filtered
+  },
+
+  getHotelsWithPromotions: async (): Promise<Hotel[]> => {
+    await new Promise(resolve => setTimeout(resolve, 300))
+    return mockHotels.filter(h => h.promotion)
   },
 
   getHotelDetails: async (hotelId: string): Promise<Hotel | null> => {

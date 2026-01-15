@@ -10,25 +10,53 @@ export function Navbar() {
   const { language, setLanguage } = useApp()
   const [isOpen, setIsOpen] = useState(false)
 
-  const NavLinks = ({ mobile = false }: { mobile?: boolean }) => (
-    <div className={mobile ? 'flex flex-col gap-4' : 'hidden md:flex items-center gap-6'}>
-      <a href="#hotels" className="text-foreground hover:text-primary transition-colors font-medium">
-        {t('nav.hotels', language)}
-      </a>
-      <a href="#destinations" className="text-foreground hover:text-primary transition-colors font-medium">
-        {t('nav.destinations', language)}
-      </a>
-      <a href="#deals" className="text-foreground hover:text-primary transition-colors font-medium">
-        {t('nav.deals', language)}
-      </a>
-      <a href="#about" className="text-foreground hover:text-primary transition-colors font-medium">
-        {t('nav.about', language)}
-      </a>
-      <a href="#contact" className="text-foreground hover:text-primary transition-colors font-medium">
-        {t('nav.contact', language)}
-      </a>
-    </div>
-  )
+  const NavLinks = ({ mobile = false }: { mobile?: boolean }) => {
+    const handleClick = () => {
+      if (mobile) {
+        setIsOpen(false)
+      }
+    }
+
+    return (
+      <div className={mobile ? 'flex flex-col gap-4' : 'hidden md:flex items-center gap-6'}>
+        <a 
+          href="#hotels" 
+          className="text-foreground hover:text-primary transition-colors font-medium"
+          onClick={handleClick}
+        >
+          {t('nav.hotels', language)}
+        </a>
+        <a 
+          href="#destinations" 
+          className="text-foreground hover:text-primary transition-colors font-medium"
+          onClick={handleClick}
+        >
+          {t('nav.destinations', language)}
+        </a>
+        <a 
+          href="#deals" 
+          className="text-foreground hover:text-primary transition-colors font-medium"
+          onClick={handleClick}
+        >
+          {t('nav.deals', language)}
+        </a>
+        <a 
+          href="#about" 
+          className="text-foreground hover:text-primary transition-colors font-medium"
+          onClick={handleClick}
+        >
+          {t('nav.about', language)}
+        </a>
+        <a 
+          href="#contact" 
+          className="text-foreground hover:text-primary transition-colors font-medium"
+          onClick={handleClick}
+        >
+          {t('nav.contact', language)}
+        </a>
+      </div>
+    )
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-card border-b border-border shadow-sm">
