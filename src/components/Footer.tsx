@@ -11,7 +11,7 @@ export function Footer() {
               <h3 className="text-lg font-bold">Hotel Cities</h3>
             </div>
             <p className="text-background/80 text-sm">
-              by American Tours - Your trusted partner for hotel reservations in Tunisia.
+              American Tours - Facilitateur de loisir en Tunisie.
             </p>
           </div>
 
