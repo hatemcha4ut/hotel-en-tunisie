@@ -7,7 +7,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <img src={hotelCitiesLogo} alt="Hotel Cities" className="w-12 h-12 rounded-lg" />
+              <img src={hotelCitiesLogo} alt="Hotel Cities" className="h-14 w-auto rounded-lg" />
             </div>
             <p className="text-background/80 text-sm">
               Par American Tours - Facilitateur de loisir en Tunisie.
