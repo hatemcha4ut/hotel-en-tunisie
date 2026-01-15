@@ -4,9 +4,9 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
-            <h3 className="text-lg font-bold mb-4">TunisBooking</h3>
+            <h3 className="text-lg font-bold mb-4">Hotel Cities</h3>
             <p className="text-background/80 text-sm">
-              Votre partenaire de confiance pour la réservation d'hôtels en Tunisie.
+              by American Tours - Your trusted partner for hotel reservations worldwide.
             </p>
           </div>
 
@@ -33,16 +33,16 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Contact</h4>
             <ul className="space-y-2 text-sm text-background/80">
-              <li>Email: contact@tunisbooking.tn</li>
-              <li>Tél: +216 70 123 456</li>
-              <li>Adresse: Avenue Habib Bourguiba</li>
-              <li>Tunis, Tunisie</li>
+              <li>Email: info@hotelcities.com</li>
+              <li>Tel: +1 800 123 4567</li>
+              <li>Address: American Tours HQ</li>
+              <li>United States</li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-background/20 pt-8 text-center text-sm text-background/80">
-          <p>&copy; {new Date().getFullYear()} TunisBooking. Tous droits réservés.</p>
+          <p>&copy; {new Date().getFullYear()} Hotel Cities by American Tours. All rights reserved.</p>
         </div>
       </div>
     </footer>
