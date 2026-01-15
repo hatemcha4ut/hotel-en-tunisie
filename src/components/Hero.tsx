@@ -160,12 +160,14 @@ export function SearchWidget({ onSearch }: SearchWidgetProps) {
           <Label>{t('search.checkIn', language)}</Label>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start text-left font-normal">
-                <CalendarBlank className="mr-2 h-4 w-4" />
-                {searchParams.checkIn ? format(searchParams.checkIn, 'dd MMM yyyy', { locale: fr }) : 'Sélectionner'}
+              <Button variant="outline" className="w-full justify-start text-left font-normal h-11">
+                <CalendarBlank className="mr-2 h-4 w-4 flex-shrink-0" />
+                <span className="truncate">
+                  {searchParams.checkIn ? format(searchParams.checkIn, 'dd MMM yyyy', { locale: fr }) : 'Sélectionner'}
+                </span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="center" sideOffset={4}>
               <Calendar
                 mode="single"
                 selected={searchParams.checkIn || undefined}
@@ -181,12 +183,14 @@ export function SearchWidget({ onSearch }: SearchWidgetProps) {
           <Label>{t('search.checkOut', language)}</Label>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start text-left font-normal">
-                <CalendarBlank className="mr-2 h-4 w-4" />
-                {searchParams.checkOut ? format(searchParams.checkOut, 'dd MMM yyyy', { locale: fr }) : 'Sélectionner'}
+              <Button variant="outline" className="w-full justify-start text-left font-normal h-11">
+                <CalendarBlank className="mr-2 h-4 w-4 flex-shrink-0" />
+                <span className="truncate">
+                  {searchParams.checkOut ? format(searchParams.checkOut, 'dd MMM yyyy', { locale: fr }) : 'Sélectionner'}
+                </span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="center" sideOffset={4}>
               <Calendar
                 mode="single"
                 selected={searchParams.checkOut || undefined}

@@ -172,6 +172,8 @@ export function ConfirmationPage({ reference, onHome }: ConfirmationPageProps) {
 
   const generateVoucherContent = (barcodeData: string, booking: any) => {
     const hotelName = booking?.hotel?.name || 'À compléter'
+    const checkInTime = booking?.hotel?.checkInTime || '15:00'
+    const checkOutTime = booking?.hotel?.checkOutTime || '12:00'
     const checkInDate = booking?.searchParams?.checkIn 
       ? format(new Date(booking.searchParams.checkIn), 'dd MMMM yyyy', { locale: fr })
       : 'À compléter'
@@ -247,11 +249,11 @@ export function ConfirmationPage({ reference, onHome }: ConfirmationPageProps) {
           </div>
           <div class="info-row">
             <div class="info-label">Date d'arrivée:</div>
-            <div class="info-value">${checkInDate}</div>
+            <div class="info-value">${checkInDate} à ${checkInTime}</div>
           </div>
           <div class="info-row">
             <div class="info-label">Date de départ:</div>
-            <div class="info-value">${checkOutDate}</div>
+            <div class="info-value">${checkOutDate} à ${checkOutTime}</div>
           </div>
           <div class="info-row">
             <div class="info-label">Nombre d'hôtes:</div>
@@ -277,6 +279,8 @@ export function ConfirmationPage({ reference, onHome }: ConfirmationPageProps) {
   const VoucherPreview = () => {
     const barcodeData = generateBarcode(reference)
     const hotelName = bookingData?.hotel?.name || 'À compléter'
+    const checkInTime = bookingData?.hotel?.checkInTime || '15:00'
+    const checkOutTime = bookingData?.hotel?.checkOutTime || '12:00'
     const checkInDate = bookingData?.searchParams?.checkIn 
       ? format(new Date(bookingData.searchParams.checkIn), 'dd MMMM yyyy', { locale: fr })
       : 'À compléter'
@@ -336,11 +340,11 @@ export function ConfirmationPage({ reference, onHome }: ConfirmationPageProps) {
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="font-semibold">Date d'arrivée:</span>
-              <span>{checkInDate}</span>
+              <span>{checkInDate} à {checkInTime}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="font-semibold">Date de départ:</span>
-              <span>{checkOutDate}</span>
+              <span>{checkOutDate} à {checkOutTime}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="font-semibold">Nombre d'hôtes:</span>

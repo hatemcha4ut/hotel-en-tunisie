@@ -91,9 +91,11 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         {step === 'auth' ? (
           <>
-            <DialogHeader className="space-y-3">
+            <DialogHeader className="space-y-2">
               <DialogTitle className="text-xl sm:text-2xl">Bienvenue</DialogTitle>
-              <p className="text-sm text-muted-foreground">Connectez-vous ou créez un compte pour continuer</p>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Connectez-vous ou créez un compte
+              </p>
             </DialogHeader>
 
             <Tabs defaultValue="login" className="w-full">

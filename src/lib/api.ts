@@ -39,6 +39,8 @@ const mockHotels: Hotel[] = [
     boardingType: ['Petit-déjeuner', 'Demi-pension', 'Pension complète', 'All Inclusive'],
     latitude: 36.4,
     longitude: 10.62,
+    checkInTime: '15:00',
+    checkOutTime: '12:00',
     promotion: {
       discount: 20,
       label: 'Offre Spéciale Été',
@@ -66,6 +68,8 @@ const mockHotels: Hotel[] = [
     boardingType: ['Petit-déjeuner', 'Demi-pension', 'All Inclusive'],
     latitude: 35.895,
     longitude: 10.605,
+    checkInTime: '14:00',
+    checkOutTime: '12:00',
     promotion: {
       discount: 20,
       label: 'Réservez tôt et économisez',
@@ -92,6 +96,8 @@ const mockHotels: Hotel[] = [
     boardingType: ['Petit-déjeuner', 'Demi-pension'],
     latitude: 36.8065,
     longitude: 10.1815,
+    checkInTime: '15:00',
+    checkOutTime: '11:00',
   },
   {
     id: '4',
@@ -113,6 +119,8 @@ const mockHotels: Hotel[] = [
     boardingType: ['Demi-pension', 'Pension complète', 'All Inclusive'],
     latitude: 33.8076,
     longitude: 10.8451,
+    checkInTime: '15:00',
+    checkOutTime: '12:00',
     promotion: {
       discount: 20,
       label: 'Séjour Famille - 20% Off',
@@ -139,6 +147,8 @@ const mockHotels: Hotel[] = [
     boardingType: ['All Inclusive'],
     latitude: 35.7753,
     longitude: 10.8263,
+    checkInTime: '14:00',
+    checkOutTime: '12:00',
     promotion: {
       discount: 20,
       label: 'Vacances d\'été All Inclusive',
@@ -165,6 +175,8 @@ const mockHotels: Hotel[] = [
     boardingType: ['Petit-déjeuner', 'Demi-pension', 'Pension complète'],
     latitude: 37.0892,
     longitude: 10.2896,
+    checkInTime: '16:00',
+    checkOutTime: '12:00',
   },
   {
     id: '7',
@@ -185,6 +197,8 @@ const mockHotels: Hotel[] = [
     boardingType: ['Petit-déjeuner', 'Demi-pension', 'Pension complète', 'All Inclusive'],
     latitude: 36.4,
     longitude: 10.6,
+    checkInTime: '15:00',
+    checkOutTime: '11:00',
     promotion: {
       discount: 20,
       label: 'Cure Thalasso Spéciale',
@@ -211,6 +225,8 @@ const mockHotels: Hotel[] = [
     boardingType: ['Petit-déjeuner', 'Demi-pension', 'All Inclusive'],
     latitude: 36.4,
     longitude: 10.58,
+    checkInTime: '14:00',
+    checkOutTime: '12:00',
   },
   {
     id: '9',
@@ -230,6 +246,8 @@ const mockHotels: Hotel[] = [
     boardingType: ['Petit-déjeuner', 'Demi-pension'],
     latitude: 36.8395,
     longitude: 10.2388,
+    checkInTime: '15:00',
+    checkOutTime: '12:00',
   },
   {
     id: '10',
@@ -250,6 +268,8 @@ const mockHotels: Hotel[] = [
     boardingType: ['All Inclusive'],
     latitude: 35.5047,
     longitude: 11.0622,
+    checkInTime: '14:00',
+    checkOutTime: '12:00',
   },
 ]
 

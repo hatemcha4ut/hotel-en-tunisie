@@ -14,6 +14,8 @@ export interface Hotel {
   boardingType: string[]
   latitude?: number
   longitude?: number
+  checkInTime?: string
+  checkOutTime?: string
   promotion?: {
     discount: number
     label: string
