@@ -47,7 +47,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-background/20 pt-8 text-center text-sm text-background/80">
-          <p>&copy; {new Date().getFullYear()} Hotel Cities by American Tours. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Hotel Cities American Tours. All rights reserved.</p>
         </div>
       </div>
     </footer>
