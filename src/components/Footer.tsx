@@ -10,7 +10,7 @@ export function Footer() {
               <img src={hotelCitiesLogo} alt="Hotel Cities" className="w-12 h-12 rounded-lg" />
             </div>
             <p className="text-background/80 text-sm">
-              American Tours - Facilitateur de loisir en Tunisie.
+              Par American Tours - Facilitateur de loisir en Tunisie.
             </p>
           </div>
 
