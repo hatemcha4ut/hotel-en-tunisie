@@ -6,7 +6,7 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-bold mb-4">Hotel Cities</h3>
             <p className="text-background/80 text-sm">
-              by American Tours - Your trusted partner for hotel reservations worldwide.
+              by American Tours - Your trusted partner for hotel reservations in Tunisia.
             </p>
           </div>
 
