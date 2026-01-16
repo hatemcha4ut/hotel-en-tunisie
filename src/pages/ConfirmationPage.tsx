@@ -272,6 +272,11 @@ export function ConfirmationPage({ reference, onHome }: ConfirmationPageProps) {
         
         <div class="voucher-id">Référence: ${reference}</div>
         
+        <div class="barcode-container">
+          <img src="${barcodeData}" alt="Barcode" />
+          <div class="barcode-number">${reference}</div>
+        </div>
+        
         <div class="section">
           <div class="section-title">Informations de réservation</div>
           <div class="info-row">
@@ -315,11 +320,6 @@ export function ConfirmationPage({ reference, onHome }: ConfirmationPageProps) {
         <div class="section">
           <div class="section-title">Détails des chambres</div>
           ${roomsHtml}
-        </div>
-        
-        <div class="barcode-container">
-          <img src="${barcodeData}" alt="Barcode" />
-          <div class="barcode-number">${reference}</div>
         </div>
         
         <div class="footer">
@@ -366,6 +366,13 @@ export function ConfirmationPage({ reference, onHome }: ConfirmationPageProps) {
           <p className="text-sm text-muted-foreground mb-2">Référence de réservation</p>
           <p className="text-4xl font-bold text-primary">{reference}</p>
         </div>
+
+        {barcodeData && (
+          <div className="bg-white p-6 rounded-lg border-2 border-gray-200 flex flex-col items-center">
+            <img src={barcodeData} alt="Barcode" className="w-full max-w-[300px] h-auto" />
+            <p className="text-xs text-muted-foreground mt-2 font-mono">{reference}</p>
+          </div>
+        )}
 
         <div>
           <h3 className="font-bold text-lg mb-3 border-b-2 pb-2">Informations de réservation</h3>
@@ -464,13 +471,6 @@ export function ConfirmationPage({ reference, onHome }: ConfirmationPageProps) {
             )}
           </div>
         </div>
-
-        {barcodeData && (
-          <div className="bg-white p-6 rounded-lg border-2 border-gray-200 flex flex-col items-center">
-            <img src={barcodeData} alt="Barcode" className="w-full max-w-[300px] h-auto" />
-            <p className="text-xs text-muted-foreground mt-2 font-mono">{reference}</p>
-          </div>
-        )}
 
         <Separator />
 
