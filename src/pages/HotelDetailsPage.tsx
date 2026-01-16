@@ -72,12 +72,22 @@ export function HotelDetailsPage({ hotelId, onBack, onBookRoom, onBookRooms }: H
         const initialBoardings: Record<string, string> = {}
         roomsData.forEach(room => {
           if (room.boardingOptions && room.boardingOptions.length > 0) {
-            initialBoardings[room.id] = room.boardingOptions[0].type
+            const logementSeulOption = room.boardingOptions.find(opt => opt.type === 'Logement seul')
+            initialBoardings[room.id] = logementSeulOption ? logementSeulOption.type : room.boardingOptions[0].type
           } else {
-            initialBoardings[room.id] = room.boardingType
+            initialBoardings[room.id] = room.boardingType || 'Logement seul'
           }
         })
         setSelectedBoardings(initialBoardings)
+        
+        const allSameBoardingType = Object.values(initialBoardings).every(
+          (boarding, _, arr) => boarding === arr[0]
+        )
+        setApplySameBoardingToAll(allSameBoardingType && roomsData.length > 1)
+        
+        if (allSameBoardingType && roomsData.length > 0) {
+          setGlobalBoardingType(initialBoardings[roomsData[0].id])
+        }
       } catch (error) {
         console.error('Error loading hotel details:', error)
         toast.error('Erreur lors du chargement des détails')
