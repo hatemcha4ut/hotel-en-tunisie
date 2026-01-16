@@ -4,11 +4,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Calendar } from '@/components/ui/calendar'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { MagnifyingGlass, CalendarBlank, Users, Minus, Plus, X } from '@phosphor-icons/react'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useApp } from '@/contexts/AppContext'
 import { t } from '@/lib/translations'
@@ -157,70 +156,47 @@ export function SearchWidget({ onSearch }: SearchWidgetProps) {
         )}
 
         <div className="space-y-2">
-          <Label>{t('search.checkIn', language)}</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start text-left font-normal h-11">
-                <CalendarBlank className="mr-2 h-4 w-4 flex-shrink-0" />
-                <span className="truncate">
-                  {searchParams.checkIn ? format(searchParams.checkIn, 'dd MMM yyyy', { locale: fr }) : "Sélectionner une date"}
-                </span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={searchParams.checkIn || undefined}
-                onSelect={(date) => {
-                  if (date) {
-                    setSearchParams({ ...searchParams, checkIn: date })
-                  }
-                }}
-                disabled={(date) => {
-                  const today = new Date()
-                  today.setHours(0, 0, 0, 0)
-                  return date < today
-                }}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <Label htmlFor="check-in-date">{t('search.checkIn', language)}</Label>
+          <div className="relative">
+            <CalendarBlank className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+            <Input
+              id="check-in-date"
+              type="date"
+              className="pl-10 h-11"
+              value={searchParams.checkIn ? format(searchParams.checkIn, 'yyyy-MM-dd') : ''}
+              min={format(new Date(), 'yyyy-MM-dd')}
+              onChange={(e) => {
+                if (e.target.value) {
+                  const date = parseISO(e.target.value)
+                  setSearchParams({ ...searchParams, checkIn: date })
+                }
+              }}
+            />
+          </div>
         </div>
 
         <div className="space-y-2">
-          <Label>{t('search.checkOut', language)}</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start text-left font-normal h-11">
-                <CalendarBlank className="mr-2 h-4 w-4 flex-shrink-0" />
-                <span className="truncate">
-                  {searchParams.checkOut ? format(searchParams.checkOut, 'dd MMM yyyy', { locale: fr }) : "Sélectionner une date"}
-                </span>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={searchParams.checkOut || undefined}
-                onSelect={(date) => {
-                  if (date) {
-                    setSearchParams({ ...searchParams, checkOut: date })
-                  }
-                }}
-                disabled={(date) => {
-                  if (!searchParams.checkIn) {
-                    const today = new Date()
-                    today.setHours(0, 0, 0, 0)
-                    return date <= today
-                  }
-                  const minCheckOut = new Date(searchParams.checkIn)
-                  minCheckOut.setDate(minCheckOut.getDate() + 1)
-                  return date < minCheckOut
-                }}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <Label htmlFor="check-out-date">{t('search.checkOut', language)}</Label>
+          <div className="relative">
+            <CalendarBlank className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+            <Input
+              id="check-out-date"
+              type="date"
+              className="pl-10 h-11"
+              value={searchParams.checkOut ? format(searchParams.checkOut, 'yyyy-MM-dd') : ''}
+              min={
+                searchParams.checkIn 
+                  ? format(new Date(searchParams.checkIn.getTime() + 86400000), 'yyyy-MM-dd')
+                  : format(new Date(Date.now() + 86400000), 'yyyy-MM-dd')
+              }
+              onChange={(e) => {
+                if (e.target.value) {
+                  const date = parseISO(e.target.value)
+                  setSearchParams({ ...searchParams, checkOut: date })
+                }
+              }}
+            />
+          </div>
         </div>
 
         <div className="space-y-2">

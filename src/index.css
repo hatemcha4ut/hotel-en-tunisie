@@ -79,17 +79,33 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
 
+input[type="date"] {
+  position: relative;
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  cursor: pointer;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit {
+  padding: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
 @media (max-width: 640px) {
-  .rdp {
-    font-size: 14px;
-  }
-  
-  .rdp-month {
-    width: 100%;
-  }
-  
-  .rdp-table {
-    max-width: 100%;
+  input[type="date"] {
+    font-size: 16px;
   }
 }
 
