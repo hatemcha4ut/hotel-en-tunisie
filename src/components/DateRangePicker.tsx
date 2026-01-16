@@ -77,7 +77,7 @@ export function DateRangePicker({
               onSelect={handleCheckInSelect}
               disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
               locale={fr}
-              defaultMonth={checkIn || new Date()}
+              month={checkIn || new Date()}
             />
           </PopoverContent>
         </Popover>
@@ -112,7 +112,7 @@ export function DateRangePicker({
                 return false
               }}
               locale={fr}
-              defaultMonth={checkOut || checkIn || new Date()}
+              month={checkOut || checkIn || new Date()}
             />
           </PopoverContent>
         </Popover>
