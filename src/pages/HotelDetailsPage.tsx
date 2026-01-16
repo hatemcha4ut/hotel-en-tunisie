@@ -107,7 +107,9 @@ export function HotelDetailsPage({ hotelId, onBack, onBookRoom, onBookRooms }: H
         const currentRoomIndex = rooms.findIndex(room => room.id === roomId)
         if (currentRoomIndex !== -1 && currentRoomIndex < rooms.length - 1) {
           const nextRoom = rooms[currentRoomIndex + 1]
-          setActiveRoomTab(nextRoom.id)
+          setTimeout(() => {
+            setActiveRoomTab(nextRoom.id)
+          }, 300)
         }
       }
     }
