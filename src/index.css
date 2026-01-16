@@ -124,7 +124,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
 
 .rdp-day_range_middle {
   background-color: oklch(0.55 0.15 245 / 0.15) !important;
-  color: oklch(0.25 0.01 245);
+  color: oklch(0.25 0.01 245) !important;
   position: relative;
 }
 
@@ -132,7 +132,44 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper {
   background-color: oklch(0.55 0.15 245 / 0.25) !important;
 }
 
+.rdp-day_selected {
+  background-color: oklch(0.55 0.15 245) !important;
+  color: white !important;
+}
+
 .rdp-day_selected:not(.rdp-day_range_start):not(.rdp-day_range_end) {
   background-color: oklch(0.55 0.15 245 / 0.15) !important;
-  color: oklch(0.25 0.01 245);
+  color: oklch(0.25 0.01 245) !important;
+}
+
+.rdp-day_range_start:hover,
+.rdp-day_range_end:hover {
+  background-color: oklch(0.5 0.15 245) !important;
+}
+
+.rdp-months {
+  width: 100%;
+}
+
+.rdp-month {
+  width: 100%;
+}
+
+.rdp-day {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+}
+
+.rdp-caption {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.rdp-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }

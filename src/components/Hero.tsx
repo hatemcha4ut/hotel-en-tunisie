@@ -157,7 +157,7 @@ export function SearchWidget({ onSearch }: SearchWidgetProps) {
         )}
 
         <div className="space-y-2">
-          <Label>{t('search.checkIn', language)}</Label>
+          <Label>Dates de séjour</Label>
           <DateRangePicker
             checkIn={searchParams.checkIn}
             checkOut={searchParams.checkOut}
