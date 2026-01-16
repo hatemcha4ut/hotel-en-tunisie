@@ -115,15 +115,13 @@ export function HotelDetailsPage({ hotelId, onBack, onBookRoom, onBookRooms }: H
     } else {
       setSelectedBoardings(prev => ({ ...prev, [roomId]: boardingType }))
       
-      setSelectedRoomsForBooking(prev => {
-        const newSet = new Set(prev)
-        if (!newSet.has(roomId) && newSet.size < searchParams.rooms.length) {
-          newSet.add(roomId)
-        }
-        return newSet
-      })
+      const newSelectedRooms = new Set(selectedRoomsForBooking)
+      if (!newSelectedRooms.has(roomId)) {
+        newSelectedRooms.add(roomId)
+      }
+      setSelectedRoomsForBooking(newSelectedRooms)
       
-      if (multiRoomMode) {
+      if (multiRoomMode && newSelectedRooms.size < searchParams.rooms.length) {
         const currentRoomIndex = rooms.findIndex(room => room.id === roomId)
         if (currentRoomIndex !== -1 && currentRoomIndex < rooms.length - 1) {
           const nextRoom = rooms[currentRoomIndex + 1]
@@ -150,6 +148,8 @@ export function HotelDetailsPage({ hotelId, onBack, onBookRoom, onBookRooms }: H
         })
         setSelectedBoardings(newBoardings)
         setGlobalBoardingType(firstRoomBoarding)
+        
+        setSelectedRoomsForBooking(new Set(rooms.map(room => room.id)))
       }
     }
   }
@@ -587,13 +587,15 @@ export function HotelDetailsPage({ hotelId, onBack, onBookRoom, onBookRooms }: H
                                       </div>
                                     )}
                                   </div>
-                                  <Button 
-                                    variant={isSelected ? 'default' : 'outline'}
-                                    onClick={() => handleToggleRoomSelection(room.id)}
-                                    size="lg"
-                                  >
-                                    {isSelected ? 'Sélectionnée' : 'Sélectionner'}
-                                  </Button>
+                                  {!applySameBoardingToAll && (
+                                    <Button 
+                                      variant={isSelected ? 'default' : 'outline'}
+                                      onClick={() => handleToggleRoomSelection(room.id)}
+                                      size="lg"
+                                    >
+                                      {isSelected ? 'Sélectionnée' : 'Sélectionner'}
+                                    </Button>
+                                  )}
                                 </div>
                               </div>
                             </div>
