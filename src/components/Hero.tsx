@@ -318,10 +318,10 @@ export function Hero({ onSearch }: { onSearch: () => void }) {
       
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12">
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 tracking-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground mb-4 tracking-tight drop-shadow-lg">
             {t('hero.title', language)}
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
+          <p className="text-xl text-primary-foreground/95 max-w-2xl mx-auto drop-shadow-md">
             {t('hero.subtitle', language)}
           </p>
         </div>
