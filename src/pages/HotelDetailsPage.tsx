@@ -110,8 +110,18 @@ export function HotelDetailsPage({ hotelId, onBack, onBookRoom, onBookRooms }: H
       })
       setSelectedBoardings(newBoardings)
       setGlobalBoardingType(boardingType)
+      
+      setSelectedRoomsForBooking(new Set(rooms.map(room => room.id)))
     } else {
       setSelectedBoardings(prev => ({ ...prev, [roomId]: boardingType }))
+      
+      setSelectedRoomsForBooking(prev => {
+        const newSet = new Set(prev)
+        if (!newSet.has(roomId) && newSet.size < searchParams.rooms.length) {
+          newSet.add(roomId)
+        }
+        return newSet
+      })
       
       if (multiRoomMode) {
         const currentRoomIndex = rooms.findIndex(room => room.id === roomId)
