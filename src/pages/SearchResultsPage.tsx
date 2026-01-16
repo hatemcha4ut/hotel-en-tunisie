@@ -41,6 +41,8 @@ export function SearchResultsPage({ onViewHotel, onBack }: SearchResultsPageProp
         })
         setHotels(results)
         setFilteredHotels(results)
+        setPriceRange([0, 500])
+        setSelectedStars([])
       } catch (error) {
         console.error('Error loading hotels:', error)
       } finally {
