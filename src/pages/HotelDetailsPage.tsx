@@ -48,6 +48,8 @@ export function HotelDetailsPage({ hotelId, onBack, onBookRoom, onBookRooms }: H
   const [selectedRoomForBooking, setSelectedRoomForBooking] = useState<Room | null>(null)
   const [tempCheckIn, setTempCheckIn] = useState<Date | undefined>(undefined)
   const [tempCheckOut, setTempCheckOut] = useState<Date | undefined>(undefined)
+  const [applySameBoardingToAll, setApplySameBoardingToAll] = useState(false)
+  const [globalBoardingType, setGlobalBoardingType] = useState<string>('')
   const multiRoomMode = searchParams.rooms.length > 1
 
   useEffect(() => {
@@ -82,7 +84,39 @@ export function HotelDetailsPage({ hotelId, onBack, onBookRoom, onBookRooms }: H
   }, [hotelId])
 
   const handleBoardingChange = (roomId: string, boardingType: string) => {
-    setSelectedBoardings(prev => ({ ...prev, [roomId]: boardingType }))
+    if (applySameBoardingToAll) {
+      const newBoardings: Record<string, string> = {}
+      rooms.forEach(room => {
+        if (room.boardingOptions?.some(opt => opt.type === boardingType)) {
+          newBoardings[room.id] = boardingType
+        } else {
+          newBoardings[room.id] = selectedBoardings[room.id]
+        }
+      })
+      setSelectedBoardings(newBoardings)
+      setGlobalBoardingType(boardingType)
+    } else {
+      setSelectedBoardings(prev => ({ ...prev, [roomId]: boardingType }))
+    }
+  }
+  
+  const handleToggleApplySameToAll = (checked: boolean) => {
+    setApplySameBoardingToAll(checked)
+    if (checked && rooms.length > 0) {
+      const firstRoomBoarding = selectedBoardings[rooms[0].id]
+      if (firstRoomBoarding) {
+        const newBoardings: Record<string, string> = {}
+        rooms.forEach(room => {
+          if (room.boardingOptions?.some(opt => opt.type === firstRoomBoarding)) {
+            newBoardings[room.id] = firstRoomBoarding
+          } else {
+            newBoardings[room.id] = selectedBoardings[room.id]
+          }
+        })
+        setSelectedBoardings(newBoardings)
+        setGlobalBoardingType(firstRoomBoarding)
+      }
+    }
   }
   
   const handleToggleRoomSelection = (roomId: string) => {
@@ -315,6 +349,30 @@ export function HotelDetailsPage({ hotelId, onBack, onBookRoom, onBookRooms }: H
                 )}
               </div>
               
+              {multiRoomMode && (
+                <Card className="mb-4 bg-muted/30 border-primary/20">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <Checkbox
+                          id="apply-same-boarding"
+                          checked={applySameBoardingToAll}
+                          onCheckedChange={handleToggleApplySameToAll}
+                        />
+                        <Label htmlFor="apply-same-boarding" className="cursor-pointer font-medium">
+                          Appliquer la même pension à toutes les chambres
+                        </Label>
+                      </div>
+                      {applySameBoardingToAll && globalBoardingType && (
+                        <Badge variant="outline" className="ml-auto">
+                          {globalBoardingType}
+                        </Badge>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              
               {multiRoomMode && selectedRoomsForBooking.size > 0 && (
                 <Card className="mb-4 border-2 border-primary">
                   <CardContent className="p-4">
@@ -341,23 +399,24 @@ export function HotelDetailsPage({ hotelId, onBack, onBookRoom, onBookRooms }: H
               
               {multiRoomMode ? (
                 <Tabs defaultValue={rooms[0]?.id || ''} className="w-full">
-                  <TabsList className="w-full justify-start overflow-x-auto flex-nowrap h-auto">
+                  <TabsList className="w-full justify-start overflow-x-auto flex-nowrap h-auto bg-muted/50">
                     {rooms.map((room, idx) => {
                       const isSelected = selectedRoomsForBooking.has(room.id)
+                      const roomNumber = idx + 1
                       return (
                         <TabsTrigger 
                           key={room.id} 
                           value={room.id}
-                          className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                          className="flex items-center gap-2 whitespace-nowrap data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 py-2"
                         >
-                          {isSelected && <Checkbox checked={true} className="w-4 h-4 pointer-events-none" />}
-                          {room.name}
+                          {isSelected && <div className="w-2 h-2 rounded-full bg-accent" />}
+                          <span className="font-semibold">Chambre {roomNumber}</span>
                         </TabsTrigger>
                       )
                     })}
                   </TabsList>
                   
-                  {rooms.map((room) => {
+                  {rooms.map((room, roomIdx) => {
                     const selectedBoarding = selectedBoardings[room.id] || room.boardingType
                     const currentBoardingOption = room.boardingOptions?.find(
                       b => b.type === selectedBoarding
@@ -365,11 +424,32 @@ export function HotelDetailsPage({ hotelId, onBack, onBookRoom, onBookRooms }: H
                     const displayPrice = currentBoardingOption?.pricePerNight || room.pricePerNight
                     const displayTotal = currentBoardingOption?.totalPrice || room.totalPrice
                     const isSelected = selectedRoomsForBooking.has(room.id)
+                    const roomNumber = roomIdx + 1
+                    const roomGuests = searchParams.rooms[roomIdx]
 
                     return (
                       <TabsContent key={room.id} value={room.id} className="mt-4">
                         <Card className={isSelected ? 'border-2 border-primary' : ''}>
                           <CardContent className="p-6">
+                            <div className="mb-4 flex items-center justify-between">
+                              <div>
+                                <h3 className="text-2xl font-bold text-primary">Chambre {roomNumber}</h3>
+                                {roomGuests && (
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    {roomGuests.adults} adulte{roomGuests.adults > 1 ? 's' : ''}
+                                    {roomGuests.children.length > 0 && `, ${roomGuests.children.length} enfant${roomGuests.children.length > 1 ? 's' : ''}`}
+                                  </p>
+                                )}
+                              </div>
+                              {isSelected && (
+                                <Badge variant="default" className="text-sm">
+                                  Sélectionnée
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            <Separator className="mb-6" />
+                            
                             <div className="flex flex-col md:flex-row gap-6">
                               <div className="w-full md:w-64 h-48 rounded-lg overflow-hidden flex-shrink-0">
                                 <img
@@ -404,19 +484,28 @@ export function HotelDetailsPage({ hotelId, onBack, onBookRoom, onBookRooms }: H
                                 {room.boardingOptions && room.boardingOptions.length > 1 && (
                                   <div className="mb-4">
                                     <Label className="text-sm font-semibold mb-3 block">
-                                      Type de pension
+                                      Type de pension {applySameBoardingToAll && '(appliqué à toutes les chambres)'}
                                     </Label>
                                     <RadioGroup
                                       value={selectedBoarding}
                                       onValueChange={(value) => handleBoardingChange(room.id, value)}
                                       className="space-y-2"
+                                      disabled={applySameBoardingToAll && roomIdx !== 0}
                                     >
                                       {room.boardingOptions.map((option) => (
                                         <div
                                           key={option.type}
-                                          className="flex items-center space-x-3 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
+                                          className={`flex items-center space-x-3 p-3 rounded-lg border border-border transition-colors ${
+                                            applySameBoardingToAll && roomIdx !== 0
+                                              ? 'opacity-60 cursor-not-allowed'
+                                              : 'hover:bg-muted/50 cursor-pointer'
+                                          }`}
                                         >
-                                          <RadioGroupItem value={option.type} id={`${room.id}-${option.type}`} />
+                                          <RadioGroupItem 
+                                            value={option.type} 
+                                            id={`${room.id}-${option.type}`}
+                                            disabled={applySameBoardingToAll && roomIdx !== 0}
+                                          />
                                           <Label
                                             htmlFor={`${room.id}-${option.type}`}
                                             className="flex-1 flex items-center justify-between cursor-pointer"
