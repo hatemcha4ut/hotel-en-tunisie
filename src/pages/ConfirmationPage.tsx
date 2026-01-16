@@ -192,6 +192,50 @@ export function ConfirmationPage({ reference, onHome }: ConfirmationPageProps) {
       ? `${booking.guestDetails.firstName} ${booking.guestDetails.lastName}`
       : 'À compléter'
     
+    const roomsHtml = booking?.rooms && booking.rooms.length > 0
+      ? booking.rooms.map((room: any, index: number) => {
+          const roomGuests = booking?.searchParams?.rooms?.[index]
+          const adults = roomGuests?.adults || 0
+          const childrenCount = roomGuests?.children?.length || 0
+          const childrenAges = roomGuests?.children?.join(', ') || ''
+          const boardingType = room.selectedBoarding || room.boardingType || 'À compléter'
+          
+          return `
+            <div class="room-card">
+              <div class="room-header">Chambre ${index + 1}: ${room.name}</div>
+              <div class="room-details">
+                <div class="room-info-row">
+                  <span class="room-label">Adultes:</span>
+                  <span>${adults}</span>
+                </div>
+                <div class="room-info-row">
+                  <span class="room-label">Enfants:</span>
+                  <span>${childrenCount}${childrenAges ? ` (âges: ${childrenAges} ans)` : ''}</span>
+                </div>
+                <div class="room-info-row">
+                  <span class="room-label">Type de pension:</span>
+                  <span>${boardingType}</span>
+                </div>
+              </div>
+            </div>
+          `
+        }).join('')
+      : `
+        <div class="room-card">
+          <div class="room-header">Chambre</div>
+          <div class="room-details">
+            <div class="room-info-row">
+              <span class="room-label">Adultes:</span>
+              <span>${booking?.searchParams?.rooms?.[0]?.adults || 0}</span>
+            </div>
+            <div class="room-info-row">
+              <span class="room-label">Enfants:</span>
+              <span>${booking?.searchParams?.rooms?.[0]?.children?.length || 0}</span>
+            </div>
+          </div>
+        </div>
+      `
+    
     return `
       <!DOCTYPE html>
       <html>
@@ -208,6 +252,11 @@ export function ConfirmationPage({ reference, onHome }: ConfirmationPageProps) {
           .info-row { display: flex; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
           .info-label { font-weight: bold; width: 200px; }
           .info-value { flex: 1; }
+          .room-card { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+          .room-header { font-size: 16px; font-weight: bold; color: #007bff; margin-bottom: 10px; }
+          .room-details { display: flex; flex-direction: column; gap: 8px; }
+          .room-info-row { display: flex; justify-content: space-between; padding: 5px 0; }
+          .room-label { font-weight: 600; color: #495057; }
           .barcode-container { text-align: center; margin: 30px 0; padding: 20px; border: 2px solid #ddd; border-radius: 8px; background: white; }
           .barcode-container img { max-width: 300px; height: auto; }
           .barcode-number { font-family: monospace; font-size: 12px; color: #666; margin-top: 10px; }
@@ -258,9 +307,14 @@ export function ConfirmationPage({ reference, onHome }: ConfirmationPageProps) {
             <div class="info-value">${checkOutDate} à ${checkOutTime}</div>
           </div>
           <div class="info-row">
-            <div class="info-label">Nombre d'hôtes:</div>
+            <div class="info-label">Nombre total d'hôtes:</div>
             <div class="info-value">${guestCount} personne(s)</div>
           </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Détails des chambres</div>
+          ${roomsHtml}
         </div>
         
         <div class="barcode-container">
@@ -295,7 +349,9 @@ export function ConfirmationPage({ reference, onHome }: ConfirmationPageProps) {
     const bookedBy = bookingData?.guestDetails 
       ? `${bookingData.guestDetails.firstName} ${bookingData.guestDetails.lastName}`
       : 'À compléter'
-    const mainOccupant = bookingData?.guestDetails 
+    const mainOccupant = bookingData?.guestDetails?.bookingForOther && bookingData?.guestDetails?.guestFirstName
+      ? `${bookingData.guestDetails.guestFirstName} ${bookingData.guestDetails.guestLastName}`
+      : bookingData?.guestDetails
       ? `${bookingData.guestDetails.firstName} ${bookingData.guestDetails.lastName}`
       : 'À compléter'
     
@@ -349,9 +405,63 @@ export function ConfirmationPage({ reference, onHome }: ConfirmationPageProps) {
               <span>{checkOutDate} à {checkOutTime}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
-              <span className="font-semibold">Nombre d'hôtes:</span>
+              <span className="font-semibold">Nombre total d'hôtes:</span>
               <span>{guestCount} personne(s)</span>
             </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="font-bold text-lg mb-3 border-b-2 pb-2">Détails des chambres</h3>
+          <div className="space-y-3">
+            {bookingData?.rooms && bookingData.rooms.length > 0 ? (
+              bookingData.rooms.map((room: any, index: number) => {
+                const roomGuests = bookingData?.searchParams?.rooms?.[index]
+                const adults = roomGuests?.adults || 0
+                const childrenCount = roomGuests?.children?.length || 0
+                const childrenAges = roomGuests?.children || []
+                const boardingType = room.selectedBoarding || room.boardingType || 'À compléter'
+                
+                return (
+                  <div key={index} className="bg-muted/50 rounded-lg p-4 border border-border">
+                    <h4 className="font-semibold text-primary mb-3">
+                      Chambre {index + 1}: {room.name}
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="font-medium text-muted-foreground">Adultes:</span>
+                        <span>{adults}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-muted-foreground">Enfants:</span>
+                        <span>
+                          {childrenCount}
+                          {childrenAges.length > 0 && ` (âges: ${childrenAges.join(', ')} ans)`}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium text-muted-foreground">Type de pension:</span>
+                        <span className="font-medium">{boardingType}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                <h4 className="font-semibold text-primary mb-3">Chambre</h4>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="font-medium text-muted-foreground">Adultes:</span>
+                    <span>{bookingData?.searchParams?.rooms?.[0]?.adults || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium text-muted-foreground">Enfants:</span>
+                    <span>{bookingData?.searchParams?.rooms?.[0]?.children?.length || 0}</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
