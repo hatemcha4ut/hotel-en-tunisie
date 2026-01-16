@@ -163,16 +163,24 @@ export function SearchWidget({ onSearch }: SearchWidgetProps) {
               <Button variant="outline" className="w-full justify-start text-left font-normal h-11">
                 <CalendarBlank className="mr-2 h-4 w-4 flex-shrink-0" />
                 <span className="truncate">
-                  {searchParams.checkIn ? format(searchParams.checkIn, 'dd MMM yyyy', { locale: fr }) : 'Sélectionner'}
+                  {searchParams.checkIn ? format(searchParams.checkIn, 'dd MMM yyyy', { locale: fr }) : "Sélectionner une date"}
                 </span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="center" sideOffset={4}>
+            <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
                 selected={searchParams.checkIn || undefined}
-                onSelect={(date) => setSearchParams({ ...searchParams, checkIn: date || null })}
-                disabled={(date) => date < new Date()}
+                onSelect={(date) => {
+                  if (date) {
+                    setSearchParams({ ...searchParams, checkIn: date })
+                  }
+                }}
+                disabled={(date) => {
+                  const today = new Date()
+                  today.setHours(0, 0, 0, 0)
+                  return date < today
+                }}
                 initialFocus
               />
             </PopoverContent>
@@ -186,17 +194,25 @@ export function SearchWidget({ onSearch }: SearchWidgetProps) {
               <Button variant="outline" className="w-full justify-start text-left font-normal h-11">
                 <CalendarBlank className="mr-2 h-4 w-4 flex-shrink-0" />
                 <span className="truncate">
-                  {searchParams.checkOut ? format(searchParams.checkOut, 'dd MMM yyyy', { locale: fr }) : 'Sélectionner'}
+                  {searchParams.checkOut ? format(searchParams.checkOut, 'dd MMM yyyy', { locale: fr }) : "Sélectionner une date"}
                 </span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 max-w-[calc(100vw-2rem)]" align="center" sideOffset={4}>
+            <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
                 selected={searchParams.checkOut || undefined}
-                onSelect={(date) => setSearchParams({ ...searchParams, checkOut: date || null })}
+                onSelect={(date) => {
+                  if (date) {
+                    setSearchParams({ ...searchParams, checkOut: date })
+                  }
+                }}
                 disabled={(date) => {
-                  if (!searchParams.checkIn) return date < new Date()
+                  if (!searchParams.checkIn) {
+                    const today = new Date()
+                    today.setHours(0, 0, 0, 0)
+                    return date <= today
+                  }
                   const minCheckOut = new Date(searchParams.checkIn)
                   minCheckOut.setDate(minCheckOut.getDate() + 1)
                   return date < minCheckOut

@@ -10,12 +10,21 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
 
+const getDefaultDates = () => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  
+  const tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  
+  return { checkIn: today, checkOut: tomorrow }
+}
+
 const defaultSearchParams: SearchParams = {
   searchMode: 'city',
   cityId: undefined,
   hotelName: undefined,
-  checkIn: null,
-  checkOut: null,
+  ...getDefaultDates(),
   rooms: [
     {
       adults: 2,
