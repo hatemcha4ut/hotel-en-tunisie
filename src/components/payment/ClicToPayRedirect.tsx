@@ -23,7 +23,11 @@ export function ClicToPayRedirect({ amount, orderId }: ClicToPayRedirectProps) {
       } catch (error) {
         if (isActive) {
           setRedirectConfig(null)
-          setErrorMessage(error instanceof Error ? error.message : 'Erreur lors de la redirection.')
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : "Une erreur inattendue s'est produite lors de la préparation de la redirection."
+          )
         }
       }
     }

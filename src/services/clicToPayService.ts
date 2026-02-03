@@ -5,6 +5,7 @@ export interface ClicToPayRedirectParams {
 
 const CLIC_TO_PAY_URL =
   import.meta.env.VITE_CLIC_TO_PAY_URL ?? 'https://www.clictopay.com.tn'
+const CLIC_TO_PAY_DECIMAL_PRECISION = 3
 const CLIC_TO_PAY_PARAMS_ENDPOINT = import.meta.env.VITE_CLIC_TO_PAY_PARAMS_ENDPOINT
 
 export const clicToPayService = {
@@ -19,7 +20,10 @@ export const clicToPayService = {
     const response = await fetch(CLIC_TO_PAY_PARAMS_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: amount.toFixed(3), orderId }),
+      body: JSON.stringify({
+        amount: amount.toFixed(CLIC_TO_PAY_DECIMAL_PRECISION),
+        orderId,
+      }),
     })
 
     if (!response.ok) {
