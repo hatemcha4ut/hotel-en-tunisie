@@ -42,8 +42,10 @@ interface HotelCardProps {
 
 export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
   const { language } = useApp()
-  const imageBaseUrl = useMemo(() => getImageBaseUrl(), [])
-  const imageSrc = resolveImageSrc(hotel.image, imageBaseUrl)
+  const imageSrc = useMemo(
+    () => resolveImageSrc(hotel.image, getImageBaseUrl()),
+    [hotel.image]
+  )
   const handleImageError = useCallback(
     (event: SyntheticEvent<HTMLImageElement>) => {
       event.currentTarget.onerror = null
