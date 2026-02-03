@@ -26,7 +26,7 @@ export function ClicToPayRedirect({ amount, orderId }: ClicToPayRedirectProps) {
           setErrorMessage(
             error instanceof Error
               ? error.message
-              : "Une erreur inattendue s'est produite lors de la préparation de la redirection. Veuillez réessayer ou contacter notre support."
+              : "Une erreur inattendue s'est produite lors de la préparation de la redirection ClicToPay. Vérifiez votre connexion ou contactez notre support."
           )
         }
       }
@@ -45,11 +45,13 @@ export function ClicToPayRedirect({ amount, orderId }: ClicToPayRedirectProps) {
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 text-center py-12">
-      <div
-        className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"
-        role="status"
-        aria-label="Chargement de la redirection"
-      />
+      {!errorMessage && (
+        <div
+          className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"
+          role="status"
+          aria-label="Chargement de la redirection"
+        />
+      )}
       {errorMessage ? (
         <p className="text-sm sm:text-base font-medium text-destructive" role="alert">
           {errorMessage}

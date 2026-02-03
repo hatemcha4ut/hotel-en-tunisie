@@ -11,7 +11,7 @@ const CLIC_TO_PAY_PARAMS_ENDPOINT = import.meta.env.VITE_CLIC_TO_PAY_PARAMS_ENDP
 export const clicToPayService = {
   async getRedirectParams(amount: number, orderId: string): Promise<ClicToPayRedirectParams> {
     if (!CLIC_TO_PAY_PARAMS_ENDPOINT) {
-      throw new Error('Configuration ClicToPay manquante.')
+      throw new Error('Configuration de ClicToPay manquante.')
     }
     if (!Number.isFinite(amount) || amount <= 0) {
       throw new Error('Le montant doit être supérieur à zéro.')
