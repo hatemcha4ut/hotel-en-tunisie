@@ -4,7 +4,7 @@ import { MapPin, Star } from '@phosphor-icons/react'
 import type { Hotel, MyGoHotel } from '@/types'
 import { t } from '@/lib/translations'
 import { useApp } from '@/contexts/AppContext'
-import { getMyGoHotelIdentifier } from '@/lib/hotel'
+import { getMyGoHotelIdentifier, MYGO_BASE_URL } from '@/lib/hotel'
 
 const isMyGoHotel = (value: Hotel | MyGoHotel): value is MyGoHotel => {
   if (value.type) {
@@ -32,7 +32,7 @@ export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
   const starsLabel = t('common.starsRating', language).replace('{stars}', String(stars))
   const imageUrl = isMyGoHotel(hotel)
     ? hotel.MainPhoto
-      ? `https://admin.mygo.co${hotel.MainPhoto}`
+      ? `${MYGO_BASE_URL}${hotel.MainPhoto}`
       : fallbackImage
     : hotel.image || fallbackImage
   const price = isMyGoHotel(hotel) ? hotel.MinPrice : hotel.price
