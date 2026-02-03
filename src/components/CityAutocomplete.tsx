@@ -5,7 +5,7 @@ import { tunisianCities } from '@/constants/cities'
 import { cn } from '@/lib/utils'
 
 // Allow click events to fire before closing the dropdown.
-const BLUR_DELAY_MS = 100
+const BLUR_DELAY_MS: number = 100
 
 interface CityAutocompleteProps {
   onSelect: (cityId: string) => void
