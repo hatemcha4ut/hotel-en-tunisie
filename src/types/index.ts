@@ -27,6 +27,7 @@ export interface Hotel {
 
 export interface MyGoHotel {
   type?: 'mygo'
+  Id?: string | number
   Name: string
   Category: number
   Address: string

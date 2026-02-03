@@ -35,7 +35,9 @@ export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
       : fallbackImage
     : hotel.image || fallbackImage
   const price = isMyGoHotel(hotel) ? hotel.MinPrice : hotel.price
-  const hotelId = isMyGoHotel(hotel) ? `${hotel.Name}-${hotel.Address}` : hotel.id
+  const hotelId = isMyGoHotel(hotel)
+    ? String(hotel.Id ?? `${hotel.Name}-${hotel.Address}`)
+    : hotel.id
 
   return (
     <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
