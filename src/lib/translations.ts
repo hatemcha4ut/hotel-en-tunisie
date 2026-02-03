@@ -32,6 +32,7 @@ type TranslationKey =
   | 'common.viewAvailability'
   | 'common.loading'
   | 'common.currency'
+  | 'common.starsRating'
 
 const translations: Record<Language, Record<TranslationKey, string>> = {
   fr: {
@@ -66,6 +67,7 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     'common.viewAvailability': 'Voir Disponibilité',
     'common.loading': 'Chargement...',
     'common.currency': 'TND',
+    'common.starsRating': '{stars} sur 5 étoiles',
   },
   en: {
     'nav.hotels': 'Hotels',
@@ -99,6 +101,7 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     'common.viewAvailability': 'View Availability',
     'common.loading': 'Loading...',
     'common.currency': 'TND',
+    'common.starsRating': '{stars} out of 5 stars',
   },
   ar: {
     'nav.hotels': 'الفنادق',
@@ -132,6 +135,7 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     'common.viewAvailability': 'عرض التوفر',
     'common.loading': 'جاري التحميل...',
     'common.currency': 'دينار',
+    'common.starsRating': '{stars} من 5 نجوم',
   },
 }
 

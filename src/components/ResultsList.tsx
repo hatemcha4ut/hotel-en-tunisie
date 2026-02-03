@@ -9,9 +9,9 @@ interface ResultsListProps {
 export function ResultsList({ hotels, onViewHotel }: ResultsListProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      {hotels.map((hotel, index) => (
+      {hotels.map((hotel) => (
         <HotelCard
-          key={`${'id' in hotel ? `hotel-${hotel.id}` : `mygo-${hotel.Name}`}`}
+          key={'id' in hotel ? hotel.id : hotel.Name}
           hotel={hotel}
           onViewDetails={onViewHotel}
         />

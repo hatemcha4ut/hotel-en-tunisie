@@ -5,6 +5,13 @@ import type { Hotel, MyGoHotel } from '@/types'
 import { t } from '@/lib/translations'
 import { useApp } from '@/contexts/AppContext'
 
+const isMyGoHotel = (value: Hotel | MyGoHotel): value is MyGoHotel => {
+  if (value.type) {
+    return value.type === 'mygo'
+  }
+  return 'Name' in value
+}
+
 interface HotelCardProps {
   hotel: Hotel | MyGoHotel
   onViewDetails: (hotelId: string) => void
@@ -15,18 +22,13 @@ const fallbackImage =
 
 export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
   const { language } = useApp()
-  const isMyGoHotel = (value: Hotel | MyGoHotel): value is MyGoHotel => {
-    if (value.type) {
-      return value.type === 'mygo'
-    }
-    return 'Name' in value
-  }
   const name = isMyGoHotel(hotel) ? hotel.Name : hotel.name
   const address = isMyGoHotel(hotel) ? hotel.Address : hotel.address || hotel.city
   const stars = Math.max(
     0,
     Math.min(5, Math.round(isMyGoHotel(hotel) ? hotel.Category : hotel.stars))
   )
+  const starsLabel = t('common.starsRating', language).replace('{stars}', String(stars))
   const imageUrl = isMyGoHotel(hotel)
     ? hotel.MainPhoto
       ? `https://admin.mygo.co${hotel.MainPhoto}`
@@ -55,7 +57,7 @@ export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-1" role="img" aria-label={`${stars} sur 5 étoiles`}>
+        <div className="flex items-center gap-1" role="img" aria-label={starsLabel}>
           {Array.from({ length: 5 }).map((_, index) => (
             <Star
               key={index}
