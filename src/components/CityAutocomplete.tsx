@@ -43,6 +43,7 @@ export function CityAutocomplete({
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
   const listboxId = useId()
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const highlightedCityIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (!selectedCityId) {
@@ -81,8 +82,31 @@ export function CityAutocomplete({
       setHighlightedIndex(-1)
       return
     }
+    const highlightedCityId = highlightedCityIdRef.current
+    if (highlightedCityId) {
+      const nextIndex = filteredCities.findIndex((city) => city.id === highlightedCityId)
+      if (nextIndex !== -1) {
+        setHighlightedIndex(nextIndex)
+        return
+      }
+    }
     setHighlightedIndex(0)
   }, [filteredCities, isOpen])
+
+  useEffect(() => {
+    if (isOpen && blurTimeoutRef.current) {
+      window.clearTimeout(blurTimeoutRef.current)
+      blurTimeoutRef.current = null
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (highlightedIndex >= 0 && highlightedIndex < filteredCities.length) {
+      highlightedCityIdRef.current = filteredCities[highlightedIndex].id
+    } else {
+      highlightedCityIdRef.current = null
+    }
+  }, [filteredCities, highlightedIndex])
 
   useEffect(() => {
     return () => {
