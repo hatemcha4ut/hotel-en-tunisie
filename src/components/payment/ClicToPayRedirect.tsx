@@ -45,9 +45,15 @@ export function ClicToPayRedirect({ amount, orderId }: ClicToPayRedirectProps) {
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 text-center py-12">
-      <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      <div
+        className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"
+        role="status"
+        aria-label="Chargement de la redirection"
+      />
       {errorMessage ? (
-        <p className="text-sm sm:text-base font-medium text-destructive">{errorMessage}</p>
+        <p className="text-sm sm:text-base font-medium text-destructive" role="alert">
+          {errorMessage}
+        </p>
       ) : (
         <>
           <p className="text-sm sm:text-base font-medium text-muted-foreground">
