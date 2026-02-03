@@ -60,8 +60,6 @@ export function CityAutocomplete({
   }, [query])
 
   const listId = `${listboxId}-listbox`
-  const activeCityId = filteredCities[0]?.id
-  const activeOptionId = activeCityId ? `${listboxId}-option-${activeCityId}` : undefined
 
   const handleSelect = (city: City) => {
     setQuery(city.name)
@@ -86,7 +84,6 @@ export function CityAutocomplete({
         aria-autocomplete="list"
         aria-expanded={isOpen}
         aria-controls={listId}
-        aria-activedescendant={activeOptionId}
       />
       {isOpen && filteredCities.length > 0 && (
         <ul
@@ -99,6 +96,7 @@ export function CityAutocomplete({
               key={city.id}
               id={`${listboxId}-option-${city.id}`}
               role="option"
+              aria-selected={city.id === selectedCityId}
               className="cursor-pointer px-3 py-2 text-foreground hover:bg-accent hover:text-accent-foreground"
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => handleSelect(city)}
