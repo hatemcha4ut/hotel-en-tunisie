@@ -4,6 +4,7 @@ import { MapPin, Star } from '@phosphor-icons/react'
 import type { Hotel, MyGoHotel } from '@/types'
 import { t } from '@/lib/translations'
 import { useApp } from '@/contexts/AppContext'
+import { getMyGoHotelIdentifier } from '@/lib/hotel'
 
 const isMyGoHotel = (value: Hotel | MyGoHotel): value is MyGoHotel => {
   if (value.type) {
@@ -35,9 +36,7 @@ export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
       : fallbackImage
     : hotel.image || fallbackImage
   const price = isMyGoHotel(hotel) ? hotel.MinPrice : hotel.price
-  const hotelId = isMyGoHotel(hotel)
-    ? String(hotel.Id ?? `${hotel.Name}-${hotel.Address}`)
-    : hotel.id
+  const hotelId = isMyGoHotel(hotel) ? getMyGoHotelIdentifier(hotel) : hotel.id
 
   return (
     <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
