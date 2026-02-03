@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DateRangePicker } from '@/components/DateRangePicker'
 import { CityAutocomplete } from '@/components/CityAutocomplete'
 import { MagnifyingGlass, Users, Minus, Plus, X } from '@phosphor-icons/react'
@@ -13,6 +14,7 @@ import { useApp } from '@/contexts/AppContext'
 import { t } from '@/lib/translations'
 import { Hotel } from '@/types'
 import { apiClient } from '@/services/apiClient'
+import { toast } from 'sonner'
 
 interface SearchWidgetProps {
   onSearch: () => void
@@ -24,6 +26,24 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(false)
   const [isCorsError, setIsCorsError] = useState(false)
+  const [showWarning, setShowWarning] = useState(false)
+
+  // Auto-dismiss warning after 4 seconds
+  useEffect(() => {
+    if (showWarning) {
+      const timer = setTimeout(() => {
+        setShowWarning(false)
+      }, 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [showWarning])
+
+  // Reset warning when user selects city or types hotel name
+  useEffect(() => {
+    if (showWarning && (searchParams.cityId || searchParams.hotelName?.trim())) {
+      setShowWarning(false)
+    }
+  }, [searchParams.cityId, searchParams.hotelName, showWarning])
 
   const handleAdultsChange = (roomIndex: number, delta: number) => {
     const newRooms = [...searchParams.rooms]
@@ -96,13 +116,16 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
     
     console.log('[Search] Click handler entry')
     
-    // Validation
-    if (searchParams.searchMode === 'city' && !searchParams.cityId) {
-      console.log('[Search] Validation failed: cityId required')
-      return
-    }
-    if (searchParams.searchMode === 'hotel' && (!searchParams.hotelName || searchParams.hotelName.trim() === '')) {
-      console.log('[Search] Validation failed: hotelName required')
+    // Check if both city and hotel are empty/missing
+    const hasCity = Boolean(searchParams.cityId)
+    const hasHotel = Boolean(searchParams.hotelName?.trim())
+    
+    if (!hasCity && !hasHotel) {
+      console.log('[Search] blocked: missing city/hotel')
+      setShowWarning(true)
+      toast.warning(t('search.validationWarning', language), {
+        duration: 4000,
+      })
       return
     }
     
@@ -115,6 +138,7 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
     setIsLoading(true)
     setError(false)
     setIsCorsError(false)
+    setShowWarning(false)
     
     const searchPayload = {
       cityId: searchParams.cityId,
@@ -365,6 +389,13 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
           </>
         )}
       </Button>
+      {showWarning && (
+        <div className="mt-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-md">
+          <p className="text-sm text-amber-600 dark:text-amber-500 font-medium">
+            {t('search.validationWarning', language)}
+          </p>
+        </div>
+      )}
       {error && (
         <div className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
           <p className="text-sm text-destructive font-medium">
