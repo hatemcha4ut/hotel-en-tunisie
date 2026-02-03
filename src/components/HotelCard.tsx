@@ -15,7 +15,8 @@ const fallbackImage =
 
 export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
   const { language } = useApp()
-  const isMyGoHotel = (value: Hotel | MyGoHotel): value is MyGoHotel => 'Name' in value
+  const isMyGoHotel = (value: Hotel | MyGoHotel): value is MyGoHotel =>
+    value.type === 'mygo' || 'Name' in value
   const name = isMyGoHotel(hotel) ? hotel.Name : hotel.name
   const address = isMyGoHotel(hotel) ? hotel.Address : hotel.address || hotel.city
   const stars = Math.max(
@@ -51,6 +52,7 @@ export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
         </div>
 
         <div className="flex items-center gap-1">
+          <span className="sr-only">{`${stars} sur 5 étoiles`}</span>
           {Array.from({ length: 5 }).map((_, index) => (
             <span
               key={index}
@@ -74,7 +76,7 @@ export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
             <div className="text-xs text-muted-foreground">{t('common.perNight', language)}</div>
           </div>
           <Button onClick={() => onViewDetails(hotelId)}>
-            Voir Disponibilité
+            {t('common.viewAvailability', language)}
           </Button>
         </div>
       </CardContent>

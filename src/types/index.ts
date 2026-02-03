@@ -1,4 +1,5 @@
 export interface Hotel {
+  type?: 'hotel'
   id: string
   name: string
   city: string
@@ -25,6 +26,7 @@ export interface Hotel {
 }
 
 export interface MyGoHotel {
+  type?: 'mygo'
   Name: string
   Category: number
   Address: string
