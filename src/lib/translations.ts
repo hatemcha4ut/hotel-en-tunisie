@@ -30,8 +30,10 @@ type TranslationKey =
   | 'common.from'
   | 'common.perNight'
   | 'common.viewDetails'
+  | 'common.viewAvailability'
   | 'common.loading'
   | 'common.currency'
+  | 'common.starsRating'
 
 const translations: Record<Language, Record<TranslationKey, string>> = {
   fr: {
@@ -64,8 +66,10 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     'common.from': 'À partir de',
     'common.perNight': 'par nuit',
     'common.viewDetails': 'Voir les détails',
+    'common.viewAvailability': 'Voir Disponibilité',
     'common.loading': 'Chargement...',
     'common.currency': 'TND',
+    'common.starsRating': '{stars} sur 5 étoiles',
   },
   en: {
     'nav.hotels': 'Hotels',
@@ -97,8 +101,10 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     'common.from': 'From',
     'common.perNight': 'per night',
     'common.viewDetails': 'View Details',
+    'common.viewAvailability': 'View Availability',
     'common.loading': 'Loading...',
     'common.currency': 'TND',
+    'common.starsRating': '{stars} out of 5 stars',
   },
   ar: {
     'nav.hotels': 'الفنادق',
@@ -130,8 +136,10 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     'common.from': 'ابتداءً من',
     'common.perNight': 'لكل ليلة',
     'common.viewDetails': 'عرض التفاصيل',
+    'common.viewAvailability': 'عرض التوفر',
     'common.loading': 'جاري التحميل...',
     'common.currency': 'دينار',
+    'common.starsRating': '{stars} من 5 نجوم',
   },
 }
 
