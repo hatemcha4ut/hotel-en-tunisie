@@ -3,12 +3,17 @@ export interface ClicToPayRedirectParams {
   params: Record<string, string>
 }
 
-const CLIC_TO_PAY_URL = 'https://www.clictopay.com.tn'
-const CLIC_TO_PAY_USERNAME = 'merchant_user'
-const CLIC_TO_PAY_PASSWORD = 'merchant_password'
+const CLIC_TO_PAY_URL =
+  import.meta.env.VITE_CLIC_TO_PAY_URL ?? 'https://www.clictopay.com.tn'
+const CLIC_TO_PAY_USERNAME = import.meta.env.VITE_CLIC_TO_PAY_USERNAME ?? ''
+const CLIC_TO_PAY_PASSWORD = import.meta.env.VITE_CLIC_TO_PAY_PASSWORD ?? ''
 
 export const clicToPayService = {
   getRedirectParams(amount: number, orderId: string): ClicToPayRedirectParams {
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new Error('Le montant doit être supérieur à zéro.')
+    }
+
     return {
       actionUrl: CLIC_TO_PAY_URL,
       params: {
