@@ -4,30 +4,35 @@ import { MapPin, Star } from '@phosphor-icons/react'
 import type { Hotel, MyGoHotel } from '@/types'
 import { t } from '@/lib/translations'
 import { useApp } from '@/contexts/AppContext'
-import { getMyGoHotelIdentifier, isMyGoHotel, MYGO_BASE_URL } from '@/lib/hotel'
+import {
+  getMyGoHotelIdentifier,
+  HOTEL_FALLBACK_IMAGE,
+  isMyGoHotel,
+  MYGO_BASE_URL
+} from '@/lib/hotel'
 
 interface HotelCardProps {
   hotel: Hotel | MyGoHotel
   onViewDetails: (hotelId: string) => void
 }
 
-const fallbackImage =
-  'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop'
+const MIN_STARS = 0
+const MAX_STARS = 5
 
 export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
   const { language } = useApp()
   const name = isMyGoHotel(hotel) ? hotel.Name : hotel.name
   const address = isMyGoHotel(hotel) ? hotel.Address : hotel.address || hotel.city
   const stars = Math.max(
-    0,
-    Math.min(5, Math.round(isMyGoHotel(hotel) ? hotel.Category : hotel.stars))
+    MIN_STARS,
+    Math.min(MAX_STARS, Math.round(isMyGoHotel(hotel) ? hotel.Category : hotel.stars))
   )
   const starsLabel = t('common.starsRating', language).replace('{stars}', String(stars))
   const imageUrl = isMyGoHotel(hotel)
     ? hotel.MainPhoto
       ? `${MYGO_BASE_URL}${hotel.MainPhoto}`
-      : fallbackImage
-    : hotel.image || fallbackImage
+      : HOTEL_FALLBACK_IMAGE
+    : hotel.image || HOTEL_FALLBACK_IMAGE
   const price = isMyGoHotel(hotel) ? hotel.MinPrice : hotel.price
   const hotelId = isMyGoHotel(hotel) ? getMyGoHotelIdentifier(hotel) : hotel.id
 
