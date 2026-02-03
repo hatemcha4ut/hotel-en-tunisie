@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import type { SyntheticEvent } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -14,7 +14,7 @@ const PLACEHOLDER_IMAGE =
 const getImageBaseUrl = () =>
   (import.meta.env.VITE_API_BASE_URL ?? 'https://admin.mygo.co').replace(/\/$/, '')
 
-const resolveImageSrc = (image: string | undefined) => {
+const resolveImageSrc = (image: string | undefined, baseUrl: string) => {
   const trimmed = image?.trim()
   if (!trimmed) {
     return PLACEHOLDER_IMAGE
@@ -29,10 +29,10 @@ const resolveImageSrc = (image: string | undefined) => {
   }
 
   if (trimmed.startsWith('/')) {
-    return `${getImageBaseUrl()}${trimmed}`
+    return `${baseUrl}${trimmed}`
   }
 
-  return `${getImageBaseUrl()}/${trimmed}`
+  return `${baseUrl}/${trimmed}`
 }
 
 interface HotelCardProps {
@@ -42,7 +42,8 @@ interface HotelCardProps {
 
 export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
   const { language } = useApp()
-  const imageSrc = resolveImageSrc(hotel.image)
+  const imageBaseUrl = useMemo(() => getImageBaseUrl(), [])
+  const imageSrc = resolveImageSrc(hotel.image, imageBaseUrl)
   const handleImageError = useCallback(
     (event: SyntheticEvent<HTMLImageElement>) => {
       event.currentTarget.onerror = null
