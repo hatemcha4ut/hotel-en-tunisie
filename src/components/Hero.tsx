@@ -23,6 +23,7 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
   const { language, searchParams, setSearchParams } = useApp()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(false)
+  const [isCorsError, setIsCorsError] = useState(false)
 
   const handleAdultsChange = (roomIndex: number, delta: number) => {
     const newRooms = [...searchParams.rooms]
@@ -113,6 +114,7 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
     
     setIsLoading(true)
     setError(false)
+    setIsCorsError(false)
     
     const searchPayload = {
       cityId: searchParams.cityId,
@@ -133,15 +135,18 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
       console.error('[Search] Error:', err)
       
       // Detect CORS errors
+      // Note: This detection logic assumes Axios-like error structure (err.request, err.response)
+      // If the HTTP client changes, this logic may need to be updated
       const errorMessage = err?.message || String(err)
-      const isCorsError = 
+      const corsDetected = 
         errorMessage.includes('CORS') || 
         errorMessage.includes('Access-Control-Allow-Origin') ||
         err?.name === 'NetworkError' ||
         (err?.response === undefined && err?.request !== undefined)
       
-      if (isCorsError) {
+      if (corsDetected) {
         console.log('[Search] CORS blocked: use server proxy')
+        setIsCorsError(true)
       }
       
       setError(true)
@@ -365,9 +370,11 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
           <p className="text-sm text-destructive font-medium">
             {t('search.errorMessage', language)}
           </p>
-          <p className="text-xs text-destructive/80 mt-1">
-            CORS blocked: use server proxy
-          </p>
+          {isCorsError && (
+            <p className="text-xs text-destructive/80 mt-1">
+              CORS blocked: use server proxy
+            </p>
+          )}
         </div>
       )}
     </Card>
