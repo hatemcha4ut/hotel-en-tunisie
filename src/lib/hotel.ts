@@ -10,7 +10,7 @@ export const isMyGoHotel = (value: Hotel | MyGoHotel): value is MyGoHotel => {
 }
 
 export const getMyGoHotelIdentifier = (hotel: MyGoHotel): string => {
-  const fallback = [hotel.Name, hotel.Address, hotel.MinPrice]
+  const fallback = [hotel.Name, hotel.Address, hotel.MinPrice, hotel.MainPhoto]
     .filter((value) => value !== undefined && value !== null && value !== '')
     .map((value) => encodeURIComponent(String(value)))
     .join('-')
