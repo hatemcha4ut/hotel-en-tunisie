@@ -72,6 +72,10 @@ export interface BookingListItem {
 
 /**
  * Search for hotels using the MyGo Hotel API
+ * 
+ * Note: This endpoint no longer returns booking tokens.
+ * JWT tokens for booking are managed by Supabase auth (see guestBooking.ts)
+ * 
  * @param params - Search parameters including dates, city, and room configuration
  * @returns Promise with the API response
  */

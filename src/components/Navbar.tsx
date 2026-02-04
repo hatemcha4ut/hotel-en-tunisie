@@ -5,14 +5,10 @@ import { List, User } from '@phosphor-icons/react'
 import { useApp } from '@/contexts/AppContext'
 import { t } from '@/lib/translations'
 import { AuthDialog } from '@/components/AuthDialog'
- copilot/remove-spark-legacy-code
 import { useAuthUser } from '@/hooks/useAuthUser'
-
 import type { AuthUser } from '@/lib/auth'
- main
 import hotelCitiesLogo from '@/assets/images/logo hotel.com.tn.svg'
 import { getSupabaseClient } from '@/lib/supabase'
-import { useAuthUser } from '@/hooks/useAuthUser'
 
 export function Navbar() {
   const { language, setLanguage } = useApp()
@@ -68,11 +64,7 @@ export function Navbar() {
     )
   }
 
- copilot/remove-spark-legacy-code
-  const handleAuthSuccess = () => {
-
   const handleAuthSuccess = (_user: AuthUser) => {
- main
     setAuthDialogOpen(false)
   }
 
