@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { CheckCircle, ArrowLeft, User, UserPlus, MagnifyingGlass } from '@phosphor-icons/react'
 import { Hotel, Room, GuestDetails } from '@/types'
-import type { AuthUser } from '@/components/AuthDialog'
+import type { AuthUser } from '@/lib/auth'
 import { useApp } from '@/contexts/AppContext'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -19,7 +19,7 @@ import { toast } from 'sonner'
 import { AuthDialog } from '@/components/AuthDialog'
 import { getSupabaseClient } from '@/lib/supabase'
 import { createGuestBooking } from '@/services/guestBooking'
-import { useAuthUser } from '@/hooks/use-auth-user'
+import { useAuthUser } from '@/hooks/useAuthUser'
 
 interface BookingPageProps {
   hotel: Hotel
@@ -54,7 +54,7 @@ export function BookingPage({ hotel, room, rooms, onBack, onComplete, onNewSearc
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [authDialogOpen, setAuthDialogOpen] = useState(false)
-  const { currentUser, setCurrentUser } = useAuthUser()
+  const currentUser = useAuthUser()
   const [isGuestMode, setIsGuestMode] = useState(false)
   const handleSubmit = async () => {
     setProcessing(true)
@@ -87,7 +87,6 @@ export function BookingPage({ hotel, room, rooms, onBack, onComplete, onNewSearc
   }
 
   const handleAuthSuccess = async (user: AuthUser) => {
-    setCurrentUser(user)
     setGuestDetails({
       ...guestDetails,
       firstName: user.name?.split(' ')[0] || '',

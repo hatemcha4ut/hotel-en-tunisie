@@ -5,15 +5,16 @@ import { List, User } from '@phosphor-icons/react'
 import { useApp } from '@/contexts/AppContext'
 import { t } from '@/lib/translations'
 import { AuthDialog } from '@/components/AuthDialog'
+import type { AuthUser } from '@/lib/auth'
 import hotelCitiesLogo from '@/assets/images/logo hotel.com.tn.svg'
 import { getSupabaseClient } from '@/lib/supabase'
-import { useAuthUser } from '@/hooks/use-auth-user'
+import { useAuthUser } from '@/hooks/useAuthUser'
 
 export function Navbar() {
   const { language, setLanguage } = useApp()
   const [isOpen, setIsOpen] = useState(false)
   const [authDialogOpen, setAuthDialogOpen] = useState(false)
-  const { currentUser, setCurrentUser } = useAuthUser()
+  const currentUser = useAuthUser()
 
   const NavLinks = ({ mobile = false }: { mobile?: boolean }) => {
     const handleClick = () => {
@@ -63,15 +64,14 @@ export function Navbar() {
     )
   }
 
-  const handleAuthSuccess = (user: any) => {
-    setCurrentUser(user)
+  const handleAuthSuccess = (_user: AuthUser) => {
+    setAuthDialogOpen(false)
   }
 
   const handleSignOut = async () => {
     try {
       const supabase = getSupabaseClient()
       await supabase.auth.signOut()
-      setCurrentUser(null)
     } catch (error) {
       console.error('Erreur lors de la déconnexion', error)
     }
@@ -107,7 +107,7 @@ export function Navbar() {
 
             <Button variant="ghost" size="sm" className="hidden md:flex items-center gap-2" onClick={() => currentUser ? handleSignOut() : setAuthDialogOpen(true)}>
               <User size={18} />
-              {currentUser ? currentUser.name : t('nav.signIn', language)}
+              {currentUser?.name || t('nav.signIn', language)}
             </Button>
 
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -144,7 +144,7 @@ export function Navbar() {
                       else handleSignOut()
                     }}>
                       <User size={18} className="mr-2" />
-                      {currentUser ? currentUser.name : t('nav.signIn', language)}
+                      {currentUser?.name || t('nav.signIn', language)}
                     </Button>
                   </div>
                 </div>
