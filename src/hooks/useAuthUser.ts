@@ -7,6 +7,7 @@ export const useAuthUser = () => {
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined
+ copilot/remove-spark-legacy-code
     try {
       const supabase = getSupabaseClient()
       supabase.auth.getUser()
@@ -27,6 +28,25 @@ export const useAuthUser = () => {
     } catch (error) {
       console.error('Error loading session', error)
     }
+
+    const supabase = getSupabaseClient()
+    supabase.auth
+      .getUser()
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Error fetching user session', error)
+          return
+        }
+        setCurrentUser(buildAuthUser(data.user))
+      })
+      .catch((error) => {
+        console.error('Failed to initialize auth session', error)
+      })
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(buildAuthUser(session?.user ?? null))
+    })
+    unsubscribe = () => listener.subscription.unsubscribe()
+ main
     return () => {
       unsubscribe?.()
     }

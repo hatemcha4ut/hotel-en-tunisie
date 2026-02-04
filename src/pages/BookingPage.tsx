@@ -12,7 +12,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { CheckCircle, ArrowLeft, User, UserPlus, MagnifyingGlass } from '@phosphor-icons/react'
 import { Hotel, Room, GuestDetails } from '@/types'
 import type { AuthUser } from '@/lib/auth'
+ copilot/remove-spark-legacy-code
 import { useAuthUser } from '@/hooks/useAuthUser'
+
+ main
 import { useApp } from '@/contexts/AppContext'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
@@ -20,6 +23,7 @@ import { toast } from 'sonner'
 import { AuthDialog } from '@/components/AuthDialog'
 import { getSupabaseClient } from '@/lib/supabase'
 import { createGuestBooking } from '@/services/guestBooking'
+import { useAuthUser } from '@/hooks/useAuthUser'
 
 interface BookingPageProps {
   hotel: Hotel
