@@ -9,13 +9,7 @@ import { Envelope, Phone, LockKey } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { getSupabaseClient } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
-
-export interface AuthUser {
-  id: string
-  email: string
-  phone: string
-  name: string
-}
+import { buildAuthUser, type AuthUser } from '@/lib/auth'
 
 interface AuthDialogProps {
   open: boolean
@@ -38,27 +32,6 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
   const [verificationCode, setVerificationCode] = useState('')
   const [generatedCode, setGeneratedCode] = useState('')
 
-  const buildUserPayload = (user: User | null): AuthUser => {
-    if (!user) {
-      throw new Error('Utilisateur non disponible.')
-    }
-    const metadata = (user.user_metadata ?? {}) as {
-      first_name?: string
-      last_name?: string
-      phone?: string
-      name?: string
-    }
-    const fallbackName = user.email ? user.email.split('@')[0] : ''
-    const firstName = metadata.first_name ?? ''
-    const lastName = metadata.last_name ?? ''
-    return {
-      id: user.id,
-      email: user.email ?? '',
-      phone: user.phone ?? metadata.phone ?? '',
-      name: `${firstName} ${lastName}`.trim() || metadata.name || fallbackName,
-    }
-  }
-
   const generateCode = () => {
     return Math.floor(100000 + Math.random() * 900000).toString()
   }
@@ -78,7 +51,11 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
         throw error
       }
       toast.success('Connexion réussie!')
-      onAuthSuccess?.(buildUserPayload(data.user))
+      const authUser = buildAuthUser(data.user)
+      if (!authUser) {
+        throw new Error('Utilisateur non disponible.')
+      }
+      onAuthSuccess?.(authUser)
       onOpenChange(false)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erreur lors de la connexion')
@@ -128,7 +105,11 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
         if (error) {
           throw error
         }
-        onAuthSuccess?.(buildUserPayload(data.user))
+        const authUser = buildAuthUser(data.user)
+        if (!authUser) {
+          throw new Error('Utilisateur non disponible.')
+        }
+        onAuthSuccess?.(authUser)
         toast.success('Compte créé avec succès!')
         onOpenChange(false)
         setStep('auth')

@@ -1,40 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { List, User } from '@phosphor-icons/react'
 import { useApp } from '@/contexts/AppContext'
 import { t } from '@/lib/translations'
-import { AuthDialog, type AuthUser } from '@/components/AuthDialog'
-import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { AuthDialog } from '@/components/AuthDialog'
+import { useAuthUser } from '@/hooks/useAuthUser'
 import hotelCitiesLogo from '@/assets/images/logo hotel.com.tn.svg'
 import { getSupabaseClient } from '@/lib/supabase'
-
-const buildAuthUser = (user: SupabaseUser | null): AuthUser | null => {
-  if (!user) {
-    return null
-  }
-  const metadata = (user.user_metadata ?? {}) as {
-    first_name?: string
-    last_name?: string
-    phone?: string
-    name?: string
-  }
-  const fallbackName = user.email ? user.email.split('@')[0] : ''
-  const firstName = metadata.first_name ?? ''
-  const lastName = metadata.last_name ?? ''
-  return {
-    id: user.id,
-    email: user.email ?? '',
-    phone: user.phone ?? metadata.phone ?? '',
-    name: `${firstName} ${lastName}`.trim() || metadata.name || fallbackName,
-  }
-}
 
 export function Navbar() {
   const { language, setLanguage } = useApp()
   const [isOpen, setIsOpen] = useState(false)
   const [authDialogOpen, setAuthDialogOpen] = useState(false)
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
+  const currentUser = useAuthUser()
 
   const NavLinks = ({ mobile = false }: { mobile?: boolean }) => {
     const handleClick = () => {
@@ -84,38 +63,14 @@ export function Navbar() {
     )
   }
 
-  useEffect(() => {
-    let unsubscribe: (() => void) | undefined
-    try {
-      const supabase = getSupabaseClient()
-      supabase.auth.getUser().then(({ data, error }) => {
-        if (error) {
-          console.error('Erreur lors du chargement de la session', error)
-          return
-        }
-        setCurrentUser(buildAuthUser(data.user))
-      })
-      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-        setCurrentUser(buildAuthUser(session?.user ?? null))
-      })
-      unsubscribe = () => listener.subscription.unsubscribe()
-    } catch (error) {
-      console.error('Erreur lors du chargement de la session', error)
-    }
-    return () => {
-      unsubscribe?.()
-    }
-  }, [])
-
-  const handleAuthSuccess = (user: AuthUser) => {
-    setCurrentUser(user)
+  const handleAuthSuccess = () => {
+    setAuthDialogOpen(false)
   }
 
   const handleSignOut = async () => {
     try {
       const supabase = getSupabaseClient()
       await supabase.auth.signOut()
-      setCurrentUser(null)
     } catch (error) {
       console.error('Erreur lors de la déconnexion', error)
     }
@@ -151,7 +106,7 @@ export function Navbar() {
 
             <Button variant="ghost" size="sm" className="hidden md:flex items-center gap-2" onClick={() => currentUser ? handleSignOut() : setAuthDialogOpen(true)}>
               <User size={18} />
-              {currentUser ? currentUser.name : t('nav.signIn', language)}
+              {currentUser?.name || t('nav.signIn', language)}
             </Button>
 
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -188,7 +143,7 @@ export function Navbar() {
                       else handleSignOut()
                     }}>
                       <User size={18} className="mr-2" />
-                      {currentUser ? currentUser.name : t('nav.signIn', language)}
+                      {currentUser?.name || t('nav.signIn', language)}
                     </Button>
                   </div>
                 </div>
