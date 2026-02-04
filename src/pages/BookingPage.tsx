@@ -62,7 +62,12 @@ export function BookingPage({ hotel, room, rooms, onBack, onComplete, onNewSearc
       if (!currentUser && !isGuestMode) {
         throw new Error('Veuillez vous connecter ou choisir le mode invité.')
       }
+      const hotelId = hotel?.id?.trim()
+      if (!hotelId) {
+        throw new Error('Identifiant de l’hôtel manquant. Veuillez revenir à la fiche hôtel.')
+      }
       await createGuestBooking({
+        hotelId,
         hotel,
         room,
         rooms: bookingRooms.map((r, idx) => ({
