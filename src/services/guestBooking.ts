@@ -21,22 +21,34 @@ interface GuestBookingResponse {
 const getPaymentUrl = (payload: GuestBookingResponse | null) =>
   payload?.paymentUrl ?? payload?.payment_url
 
-export const createGuestBooking = async (payload: GuestBookingPayload) => {
+export const createGuestBooking = async (bookingData: GuestBookingPayload) => {
+  console.log('Starting createBooking with:', { bookingData })
+  const payload = bookingData
   const supabase = getSupabaseClient()
-  const { data, error } = await supabase.functions.invoke<GuestBookingResponse>('create-booking', {
-    body: payload,
-  })
 
-  if (error) {
-    throw new Error(error?.message || 'Impossible de créer la réservation.')
-  }
-
-  const paymentUrl = getPaymentUrl(data ?? null)
-  if (!paymentUrl) {
-    throw new Error(
-      "La réservation a été créée mais l'URL de paiement est manquante. Veuillez contacter le support."
+  try {
+    console.log('Payload ready:', payload)
+    const { data, error } = await supabase.functions.invoke<GuestBookingResponse>(
+      'create-booking',
+      {
+        body: payload,
+      }
     )
-  }
 
-  window.location.assign(paymentUrl)
+    if (error) {
+      throw new Error(error?.message || 'Impossible de créer la réservation.')
+    }
+
+    const paymentUrl = getPaymentUrl(data ?? null)
+    if (!paymentUrl) {
+      throw new Error(
+        "La réservation a été créée mais l'URL de paiement est manquante. Veuillez contacter le support."
+      )
+    }
+
+    window.location.assign(paymentUrl)
+  } catch (error) {
+    console.error('Error in createBooking:', error)
+    throw error
+  }
 }
