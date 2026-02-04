@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,9 +17,30 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { AuthDialog } from '@/components/AuthDialog'
-import { useKV } from '@github/spark/hooks'
 import { getSupabaseClient } from '@/lib/supabase'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { createGuestBooking } from '@/services/guestBooking'
+
+const buildAuthUser = (user: SupabaseUser | null): AuthUser | null => {
+  if (!user) {
+    return null
+  }
+  const metadata = (user.user_metadata ?? {}) as {
+    first_name?: string
+    last_name?: string
+    phone?: string
+    name?: string
+  }
+  const fallbackName = user.email ? user.email.split('@')[0] : ''
+  const firstName = metadata.first_name ?? ''
+  const lastName = metadata.last_name ?? ''
+  return {
+    id: user.id,
+    email: user.email ?? '',
+    phone: user.phone ?? metadata.phone ?? '',
+    name: `${firstName} ${lastName}`.trim() || metadata.name || fallbackName,
+  }
+}
 
 interface BookingPageProps {
   hotel: Hotel
@@ -54,8 +75,31 @@ export function BookingPage({ hotel, room, rooms, onBack, onComplete, onNewSearc
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [authDialogOpen, setAuthDialogOpen] = useState(false)
-  const [currentUser, setCurrentUser] = useKV<any>('currentUser', null)
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
   const [isGuestMode, setIsGuestMode] = useState(false)
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined
+    try {
+      const supabase = getSupabaseClient()
+      supabase.auth.getUser().then(({ data, error }) => {
+        if (error) {
+          console.error('Erreur lors du chargement de la session', error)
+          return
+        }
+        setCurrentUser(buildAuthUser(data.user))
+      })
+      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+        setCurrentUser(buildAuthUser(session?.user ?? null))
+      })
+      unsubscribe = () => listener.subscription.unsubscribe()
+    } catch (error) {
+      console.error('Erreur lors du chargement de la session', error)
+    }
+    return () => {
+      unsubscribe?.()
+    }
+  }, [])
+
   const handleSubmit = async () => {
     setProcessing(true)
     try {
