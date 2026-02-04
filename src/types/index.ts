@@ -100,12 +100,15 @@ export interface Booking {
   createdAt: string
 }
 
+/**
+ * Legacy User interface - consider using AuthUser from @/lib/auth instead
+ * Token field removed as JWT tokens are now managed by Supabase auth
+ */
 export interface User {
   id: string
   name: string
   email: string
   phone: string
-  token: string
 }
 
 export interface FilterOptions {

@@ -1,3 +1,13 @@
+/**
+ * Guest Booking Service
+ * 
+ * This service handles booking creation for both authenticated and guest users.
+ * JWT tokens are automatically included by Supabase client:
+ * - For logged-in users: session access_token
+ * - For guest users: anon key
+ * 
+ * No MyGo tokens are used or required from search-hotels response.
+ */
 import { getSupabaseClient } from '@/lib/supabase'
 import type { GuestDetails, Hotel, Room, SearchParams } from '@/types'
 
@@ -29,6 +39,20 @@ export const createGuestBooking = async (bookingData: GuestBookingPayload) => {
   const supabase = getSupabaseClient()
 
   try {
+    // Get current session to verify JWT token will be included
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    
+    if (sessionError) {
+      console.warn('Session retrieval warning:', sessionError)
+    }
+    
+    // Log session state for debugging (guest users will have null session, using anon key)
+    console.log('Auth session status:', {
+      hasSession: !!sessionData?.session,
+      hasAccessToken: !!sessionData?.session?.access_token,
+      userEmail: sessionData?.session?.user?.email || 'guest',
+    })
+    
     console.log('Payload ready:', payload)
     const functionUrl = supabaseUrl
       ? new URL('/functions/v1/create-booking', supabaseUrl).toString()
@@ -37,6 +61,10 @@ export const createGuestBooking = async (bookingData: GuestBookingPayload) => {
       'Supabase function URL:',
       functionUrl ?? 'VITE_SUPABASE_URL manquante.'
     )
+    
+    // Supabase client automatically includes Authorization: Bearer <JWT> header
+    // For logged-in users: uses session access_token
+    // For guest users: uses anon key
     const response = await supabase.functions.invoke<GuestBookingResponse>(
       'create-booking',
       {
