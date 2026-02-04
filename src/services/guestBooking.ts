@@ -2,6 +2,7 @@ import { getSupabaseClient } from '@/lib/supabase'
 import type { GuestDetails, Hotel, Room, SearchParams } from '@/types'
 
 export interface GuestBookingPayload {
+  hotelId: string
   hotel: Hotel
   room: Room
   rooms: Room[]
