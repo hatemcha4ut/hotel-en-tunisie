@@ -18,7 +18,7 @@ interface GuestBookingResponse {
   reference?: string
 }
 
-const extractPaymentUrl = (payload: GuestBookingResponse | null) =>
+const getPaymentUrl = (payload: GuestBookingResponse | null) =>
   payload?.paymentUrl ?? payload?.payment_url
 
 export const createGuestBooking = async (payload: GuestBookingPayload) => {
@@ -28,10 +28,10 @@ export const createGuestBooking = async (payload: GuestBookingPayload) => {
   })
 
   if (error) {
-    throw error
+    throw new Error(error?.message || 'Impossible de créer la réservation.')
   }
 
-  const paymentUrl = extractPaymentUrl(data ?? null)
+  const paymentUrl = getPaymentUrl(data ?? null)
   if (!paymentUrl) {
     throw new Error(
       "La réservation a été créée mais l'URL de paiement est manquante. Veuillez contacter le support."

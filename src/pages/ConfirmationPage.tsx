@@ -49,6 +49,7 @@ export function ConfirmationPage({ reference, onHome, onNewSearch }: Confirmatio
           setLoadError(
             'Token de confirmation manquant. Veuillez vérifier le lien reçu par email ou contacter le support.'
           )
+          setIsLoading(false)
           return
         }
 
@@ -57,7 +58,7 @@ export function ConfirmationPage({ reference, onHome, onNewSearch }: Confirmatio
           body: { confirmation_token: token },
         })
         if (error) {
-          throw error
+          throw new Error(error?.message || 'Erreur lors de la récupération de la réservation.')
         }
         if (data) {
           setBookingData(data)
@@ -75,6 +76,10 @@ export function ConfirmationPage({ reference, onHome, onNewSearch }: Confirmatio
   }, [reference])
 
   const handleDownloadVoucher = () => {
+    if (!resolvedReference) {
+      toast.error('Référence de réservation indisponible.')
+      return
+    }
     toast.success('Téléchargement du voucher...')
     const barcodeData = generateBarcode(resolvedReference)
     const voucherContent = generateVoucherContent(barcodeData, bookingData)
@@ -82,7 +87,7 @@ export function ConfirmationPage({ reference, onHome, onNewSearch }: Confirmatio
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `voucher-${resolvedReference || 'reservation'}.html`
+    a.download = `voucher-${resolvedReference}.html`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -126,6 +131,10 @@ export function ConfirmationPage({ reference, onHome, onNewSearch }: Confirmatio
   }
 
   const handleAddToGoogleWallet = () => {
+    if (!resolvedReference) {
+      toast.error('Référence de réservation indisponible.')
+      return
+    }
     const hotelName = bookingData?.hotel?.name || 'www.hotel.com.tn'
     const checkIn = bookingData?.searchParams?.checkIn 
       ? format(new Date(bookingData.searchParams.checkIn), 'dd MMMM yyyy', { locale: fr })
@@ -157,7 +166,7 @@ export function ConfirmationPage({ reference, onHome, onNewSearch }: Confirmatio
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `google-wallet-${resolvedReference || 'reservation'}.json`
+    a.download = `google-wallet-${resolvedReference}.json`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -167,6 +176,10 @@ export function ConfirmationPage({ reference, onHome, onNewSearch }: Confirmatio
   }
 
   const handleAddToAppleWallet = () => {
+    if (!resolvedReference) {
+      toast.error('Référence de réservation indisponible.')
+      return
+    }
     const hotelName = bookingData?.hotel?.name || 'www.hotel.com.tn'
     const checkIn = bookingData?.searchParams?.checkIn 
       ? format(new Date(bookingData.searchParams.checkIn), 'dd MMMM yyyy', { locale: fr })
@@ -200,7 +213,7 @@ export function ConfirmationPage({ reference, onHome, onNewSearch }: Confirmatio
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `apple-wallet-${resolvedReference || 'reservation'}.pkpass.json`
+    a.download = `apple-wallet-${resolvedReference}.pkpass.json`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)

@@ -98,9 +98,9 @@ export function BookingPage({ hotel, room, rooms, onBack, onComplete, onNewSearc
     setProcessing(true)
     try {
       const supabase = getSupabaseClient()
-      const { error: authError } = await supabase.auth.signInAnonymously()
-      if (authError) {
-        throw authError
+      const { error } = await supabase.auth.signInAnonymously()
+      if (error) {
+        throw error
       }
       setIsGuestMode(true)
       toast.success('Session invité créée. Vous pouvez finaliser la réservation.')
