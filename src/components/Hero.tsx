@@ -9,22 +9,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DateRangePicker } from '@/components/DateRangePicker'
 import { CityAutocomplete } from '@/components/CityAutocomplete'
 import { MagnifyingGlass, Users, Minus, Plus, X } from '@phosphor-icons/react'
-import { format } from 'date-fns'
 import { useApp } from '@/contexts/AppContext'
 import { t } from '@/lib/translations'
-import { City, Hotel } from '@/types'
-import { fetchCities, searchInventory } from '@/services/inventorySync'
+import { City } from '@/types'
+import { fetchCities } from '@/services/inventorySync'
+import { buildSearchRequest, fetchSearchHotels, mapSearchHotelsToList } from '@/services/searchHotels'
+import type { SearchHotelsResult } from '@/services/searchHotels'
 import { toast } from 'sonner'
-import { useCities } from '@/hooks/useCities'
 
 interface SearchWidgetProps {
   onSearch: () => void
-  onResultsFound: (hotels: Hotel[]) => void
+  onResultsFound: (results: SearchHotelsResult) => void
 }
 
 export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
   const { language, searchParams, setSearchParams } = useApp()
-  const { cities } = useCities()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(false)
   const [isCorsError, setIsCorsError] = useState(false)
@@ -120,12 +119,10 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
     
     console.log('[Search] Click handler entry')
     
-    // Check if both city and hotel are empty/missing
     const hasCity = Boolean(searchParams.cityId)
-    const hasHotel = Boolean(searchParams.hotelName?.trim())
     
-    if (!hasCity && !hasHotel) {
-      console.log('[Search] blocked: missing city/hotel')
+    if (!hasCity) {
+      console.log('[Search] blocked: missing city')
       toast.warning(t('search.validationWarning', language), {
         duration: 4000,
       })
@@ -142,21 +139,29 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
     setError(false)
     setIsCorsError(false)
     
-    const searchPayload = {
-      cityId: searchParams.cityId,
-      hotelName: searchParams.hotelName,
-      checkIn: searchParams.checkIn ? format(searchParams.checkIn, 'yyyy-MM-dd') : undefined,
-      checkOut: searchParams.checkOut ? format(searchParams.checkOut, 'yyyy-MM-dd') : undefined,
+    let searchPayload
+    try {
+      searchPayload = buildSearchRequest(searchParams)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('search.errorMessage', language)
+      toast.error(message)
+      setError(true)
+      setIsLoading(false)
+      return
     }
     
     console.log('[Search] Search params:', searchPayload)
     console.log('[Search] Request start')
     
     try {
-      const response = await searchInventory(searchPayload)
-      const results = response?.hotels ?? []
+      const response = await fetchSearchHotels(searchPayload)
+      const results = mapSearchHotelsToList(response.hotels)
       console.log('[Search] Request end - Results count:', results.length)
-      onResultsFound(results)
+      onResultsFound({
+        hotels: results,
+        rawCount: response.rawCount,
+        visibleCount: response.visibleCount,
+      })
       onSearch()
     } catch (err: any) {
       console.error('[Search] Error:', err)
@@ -412,7 +417,13 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
   )
 }
 
-export function Hero({ onSearch, onResultsFound }: { onSearch: () => void; onResultsFound: (hotels: Hotel[]) => void }) {
+export function Hero({
+  onSearch,
+  onResultsFound,
+}: {
+  onSearch: () => void
+  onResultsFound: (results: SearchHotelsResult) => void
+}) {
   const { language } = useApp()
 
   return (

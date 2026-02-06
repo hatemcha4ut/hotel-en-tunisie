@@ -35,6 +35,7 @@ type TranslationKey =
   | 'common.loading'
   | 'common.currency'
   | 'common.starsRating'
+  | 'common.onRequest'
 
 const translations: Record<Language, Record<TranslationKey, string>> = {
   fr: {
@@ -64,7 +65,7 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     'search.removeRoom': 'Supprimer',
     'search.searchHotels': 'Rechercher',
     'search.errorMessage': 'Une erreur est survenue. Veuillez réessayer.',
-    'search.validationWarning': 'Veuillez sélectionner une ville ou saisir un nom d\'hôtel.',
+    'search.validationWarning': 'Veuillez sélectionner une ville.',
     'common.from': 'À partir de',
     'common.perNight': 'par nuit',
     'common.viewDetails': 'Voir les détails',
@@ -72,6 +73,7 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     'common.loading': 'Chargement...',
     'common.currency': 'TND',
     'common.starsRating': '{stars} sur 5 étoiles',
+    'common.onRequest': 'Sur demande',
   },
   en: {
     'nav.hotels': 'Hotels',
@@ -100,7 +102,7 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     'search.removeRoom': 'Remove',
     'search.searchHotels': 'Search',
     'search.errorMessage': 'Something went wrong. Please try again.',
-    'search.validationWarning': 'Please select a city or enter a hotel name.',
+    'search.validationWarning': 'Please select a city.',
     'common.from': 'From',
     'common.perNight': 'per night',
     'common.viewDetails': 'View Details',
@@ -108,6 +110,7 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     'common.loading': 'Loading...',
     'common.currency': 'TND',
     'common.starsRating': '{stars} out of 5 stars',
+    'common.onRequest': 'On request',
   },
   ar: {
     'nav.hotels': 'الفنادق',
@@ -136,7 +139,7 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     'search.removeRoom': 'حذف',
     'search.searchHotels': 'بحث',
     'search.errorMessage': 'حدث خطأ. يرجى المحاولة مرة أخرى.',
-    'search.validationWarning': 'يرجى اختيار مدينة أو إدخال اسم فندق.',
+    'search.validationWarning': 'يرجى اختيار مدينة.',
     'common.from': 'ابتداءً من',
     'common.perNight': 'لكل ليلة',
     'common.viewDetails': 'عرض التفاصيل',
@@ -144,6 +147,7 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     'common.loading': 'جاري التحميل...',
     'common.currency': 'دينار',
     'common.starsRating': '{stars} من 5 نجوم',
+    'common.onRequest': 'حسب الطلب',
   },
 }
 

@@ -13,6 +13,7 @@ import { TermsPage } from '@/pages/TermsPage'
 import { PrivacyPage } from '@/pages/PrivacyPage'
 import { AdminDashboard } from '@/pages/AdminDashboard'
 import { Hotel, Room } from '@/types'
+import type { SearchHotelsResult } from '@/services/searchHotels'
 
 type Page = 'home' | 'search' | 'hotel' | 'booking' | 'confirmation' | 'contact' | 'terms' | 'privacy' | 'admin'
 
@@ -20,7 +21,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home')
   const [selectedHotelId, setSelectedHotelId] = useState<string>('')
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null)
-  const [searchResults, setSearchResults] = useState<Hotel[] | null>(null)
+  const [searchResults, setSearchResults] = useState<SearchHotelsResult | null>(null)
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null)
   const [selectedRooms, setSelectedRooms] = useState<Room[]>([])
   const [bookingReference, setBookingReference] = useState<string>('')

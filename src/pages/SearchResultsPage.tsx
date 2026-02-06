@@ -13,14 +13,15 @@ import { useApp } from '@/contexts/AppContext'
 import { t } from '@/lib/translations'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { fetchHotelsByCity, searchInventory } from '@/services/inventorySync'
+import { buildSearchRequest, fetchSearchHotels, mapSearchHotelsToList } from '@/services/searchHotels'
+import type { SearchHotelsResult } from '@/services/searchHotels'
 import { toast } from 'sonner'
 
 interface SearchResultsPageProps {
   onViewHotel: (hotelId: string) => void
   onBack: () => void
   onNewSearch?: () => void
-  initialResults?: Hotel[]
+  initialResults?: SearchHotelsResult
 }
 
 export function SearchResultsPage({ onViewHotel, onBack, onNewSearch, initialResults }: SearchResultsPageProps) {
@@ -28,6 +29,12 @@ export function SearchResultsPage({ onViewHotel, onBack, onNewSearch, initialRes
   const [hotels, setHotels] = useState<Hotel[]>([])
   const [filteredHotels, setFilteredHotels] = useState<Hotel[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [noResults, setNoResults] = useState(false)
+  const [searchCounts, setSearchCounts] = useState<{
+    rawCount?: number
+    visibleCount?: number
+  } | null>(null)
   const [sortBy, setSortBy] = useState<SortOption>('price-asc')
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 500])
   const [selectedStars, setSelectedStars] = useState<number[]>([])
@@ -35,39 +42,47 @@ export function SearchResultsPage({ onViewHotel, onBack, onNewSearch, initialRes
 
   useEffect(() => {
     if (initialResults) {
-      setHotels(initialResults)
-      setFilteredHotels(initialResults)
+      setHotels(initialResults.hotels)
+      setFilteredHotels(initialResults.hotels)
       setPriceRange([0, 500])
       setSelectedStars([])
+      setError(null)
+      setNoResults(initialResults.hotels.length === 0)
+      setSearchCounts({
+        rawCount: initialResults.rawCount,
+        visibleCount: initialResults.visibleCount,
+      })
       setLoading(false)
       return
     }
 
     const loadHotels = async () => {
       setLoading(true)
+      setError(null)
+      setNoResults(false)
+      setSearchCounts(null)
       try {
-        let results: Hotel[] = []
-        // city mode lists hotels for the chosen destination; other modes use the inventory search.
-        if (searchParams.searchMode === 'city' && searchParams.cityId) {
-          results = await fetchHotelsByCity(searchParams.cityId)
-        } else {
-          const response = await searchInventory({
-            cityId: searchParams.cityId,
-            hotelName: searchParams.hotelName,
-            checkIn: searchParams.checkIn ? format(searchParams.checkIn, 'yyyy-MM-dd') : undefined,
-            checkOut: searchParams.checkOut ? format(searchParams.checkOut, 'yyyy-MM-dd') : undefined,
-          })
-          results = response?.hotels ?? []
-        }
+        const payload = buildSearchRequest(searchParams)
+        const response = await fetchSearchHotels(payload)
+        const results = mapSearchHotelsToList(response.hotels)
         setHotels(results)
         setFilteredHotels(results)
         setPriceRange([0, 500])
         setSelectedStars([])
+        setNoResults(results.length === 0)
+        setSearchCounts({
+          rawCount: response.rawCount,
+          visibleCount: response.visibleCount,
+        })
       } catch (error) {
         console.error('Error loading hotels:', error)
         const message =
           error instanceof Error ? error.message : t('search.errorMessage', language)
         toast.error(message)
+        setError(message)
+        setHotels([])
+        setFilteredHotels([])
+        setSearchCounts(null)
       } finally {
         setLoading(false)
       }
@@ -142,6 +157,14 @@ export function SearchResultsPage({ onViewHotel, onBack, onNewSearch, initialRes
                   </span>
                 )}
               </div>
+              {import.meta.env.DEV &&
+                searchCounts &&
+                (searchCounts.visibleCount !== undefined || searchCounts.rawCount !== undefined) && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  Hôtels trouvés : {searchCounts.visibleCount ?? filteredHotels.length}
+                  {searchCounts.rawCount !== undefined ? ` (brut : ${searchCounts.rawCount})` : ''}
+                </div>
+              )}
             </div>
             
             <div className="flex items-center gap-4">
@@ -223,23 +246,29 @@ export function SearchResultsPage({ onViewHotel, onBack, onNewSearch, initialRes
           </aside>
 
           <main className="flex-1">
-             {loading ? (
-               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                 {Array.from({ length: 6 }).map((_, i) => (
-                   <div key={i} className="h-96 bg-muted animate-pulse rounded-lg" />
-                 ))}
-               </div>
-             ) : filteredHotels.length === 0 ? (
-               <Card className="p-12 text-center">
-                 <h3 className="text-xl font-semibold mb-2">Aucun hôtel trouvé</h3>
-                 <p className="text-muted-foreground mb-6">
-                   Essayez de modifier vos critères de recherche ou de réinitialiser les filtres.
-                 </p>
-                 <Button onClick={onBack}>Nouvelle recherche</Button>
-               </Card>
-             ) : (
-               <ResultsList hotels={filteredHotels} onViewHotel={onViewHotel} />
-             )}
+            {loading ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-96 bg-muted animate-pulse rounded-lg" />
+                ))}
+              </div>
+            ) : error ? (
+              <Card className="p-12 text-center">
+                <h3 className="text-xl font-semibold mb-2">Une erreur est survenue</h3>
+                <p className="text-muted-foreground mb-6">{error}</p>
+                <Button onClick={onBack}>Nouvelle recherche</Button>
+              </Card>
+            ) : noResults || filteredHotels.length === 0 ? (
+              <Card className="p-12 text-center">
+                <h3 className="text-xl font-semibold mb-2">Aucun hôtel trouvé</h3>
+                <p className="text-muted-foreground mb-6">
+                  Essayez de modifier vos critères de recherche ou de réinitialiser les filtres.
+                </p>
+                <Button onClick={onBack}>Nouvelle recherche</Button>
+              </Card>
+            ) : (
+              <ResultsList hotels={filteredHotels} onViewHotel={onViewHotel} />
+            )}
           </main>
         </div>
       </div>
