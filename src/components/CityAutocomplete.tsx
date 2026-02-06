@@ -21,6 +21,31 @@ const normalizeForSearch = (value: string | null | undefined) =>
     .trim()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    // Normalize en-dash/em-dash characters from labels like "City – Region" for search matching.
+    .replace(/[\u2013\u2014()]/g, ' ')
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+    .replace(/\s+/g, ' ')
+
+const getCityLabel = (city: City) => {
+  const region = city.region?.trim()
+  const country = city.country?.trim()
+  if (region && country) {
+    return `${city.name} – ${region} (${country})`
+  }
+  if (region) {
+    return `${city.name} – ${region}`
+  }
+  if (country) {
+    return `${city.name} (${country})`
+  }
+  return city.name
+}
+
+const getCitySearchValue = (city: City) =>
+  [city.name, city.region, city.country]
+    .map((value) => value?.trim())
+    .filter(Boolean)
+    .join(' ')
 
 export function CityAutocomplete({
   onSelect,
@@ -43,17 +68,28 @@ export function CityAutocomplete({
     }
     const selectedCity = cities.find((city) => city.id === selectedCityId)
     if (selectedCity) {
-      setQuery(selectedCity.name)
+      setQuery(getCityLabel(selectedCity))
     }
   }, [cities, selectedCityId])
 
+  const searchableCities = useMemo(
+    () =>
+      cities.map((city) => ({
+        city,
+        searchValue: normalizeForSearch(getCitySearchValue(city)),
+      })),
+    [cities]
+  )
+
   const filteredCities = useMemo(() => {
     const normalizedQuery = normalizeForSearch(query)
-    if (!normalizedQuery) {
-      return cities
-    }
-    return cities.filter((city) => normalizeForSearch(city.name).includes(normalizedQuery))
-  }, [cities, query])
+    // Match by name/region/country so searches work with all available metadata.
+    return searchableCities
+      .filter((city) =>
+        normalizedQuery ? city.searchValue.includes(normalizedQuery) : true
+      )
+      .map((city) => city.city)
+  }, [query, searchableCities])
 
   const listId = `${listboxId}-listbox`
   const activeOption =
@@ -63,7 +99,7 @@ export function CityAutocomplete({
   const activeOptionId = activeOption ? `${listboxId}-option-${activeOption.id}` : undefined
 
   const handleSelect = (city: City) => {
-    setQuery(city.name)
+    setQuery(getCityLabel(city))
     setIsOpen(false)
     onSelect(city.id)
   }
@@ -187,7 +223,7 @@ export function CityAutocomplete({
               onMouseEnter={() => setHighlightedIndex(index)}
               onClick={() => handleSelect(city)}
             >
-              {city.name}
+              {getCityLabel(city)}
             </li>
           ))}
         </ul>

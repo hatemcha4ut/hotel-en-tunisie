@@ -15,6 +15,7 @@ import { t } from '@/lib/translations'
 import { Hotel } from '@/types'
 import { apiClient } from '@/services/apiClient'
 import { toast } from 'sonner'
+import { useCities } from '@/hooks/useCities'
 
 interface SearchWidgetProps {
   onSearch: () => void
@@ -23,6 +24,7 @@ interface SearchWidgetProps {
 
 export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
   const { language, searchParams, setSearchParams } = useApp()
+  const { cities } = useCities()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(false)
   const [isCorsError, setIsCorsError] = useState(false)
@@ -191,6 +193,7 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
             <CityAutocomplete
               selectedCityId={searchParams.cityId}
               placeholder={t('search.selectCity', language)}
+              cities={cities}
               onSelect={(value) => setSearchParams({ ...searchParams, cityId: value })}
             />
           </div>
