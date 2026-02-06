@@ -36,8 +36,8 @@ const mapCity = (city: InventoryCity): City | null => {
 
 const sortCities = (cities: City[]) =>
   [...cities].sort((first, second) => {
-    const firstPrimary = (first.name || first.region || '').toLowerCase()
-    const secondPrimary = (second.name || second.region || '').toLowerCase()
+    const firstPrimary = first.name.toLowerCase()
+    const secondPrimary = second.name.toLowerCase()
     if (firstPrimary !== secondPrimary) {
       return firstPrimary.localeCompare(secondPrimary)
     }
