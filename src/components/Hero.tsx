@@ -26,7 +26,6 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(false)
   const [isCorsError, setIsCorsError] = useState(false)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [cities, setCities] = useState<City[]>([])
 
   useEffect(() => {
@@ -140,7 +139,6 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
     setIsLoading(true)
     setError(false)
     setIsCorsError(false)
-    setErrorMessage(null)
     
     const searchPayload = {
       cityId: searchParams.cityId,
@@ -177,7 +175,6 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
       }
       
       const message = err instanceof Error ? err.message : 'Erreur lors de la recherche'
-      setErrorMessage(message)
       toast.error(message)
       setError(true)
     } finally {
@@ -399,7 +396,7 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
       {error && (
         <div className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
           <p className="text-sm text-destructive font-medium">
-            {errorMessage ?? t('search.errorMessage', language)}
+            {t('search.errorMessage', language)}
           </p>
           {isCorsError && (
             <p className="text-xs text-destructive/80 mt-1">
