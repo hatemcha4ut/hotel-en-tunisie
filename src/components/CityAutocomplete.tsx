@@ -21,6 +21,7 @@ const normalizeForSearch = (value: string | null | undefined) =>
     .trim()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, '')
 
 const getCityLabel = (city: City) => {
   const region = city.region?.trim()
