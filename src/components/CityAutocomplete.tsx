@@ -21,7 +21,7 @@ const normalizeForSearch = (value: string | null | undefined) =>
     .trim()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    // Normalize en/em dashes from labels like "City – Region" for search matching.
+    // Normalize en-dash/em-dash characters from labels like "City – Region" for search matching.
     .replace(/[\u2013\u2014()]/g, ' ')
     .replace(/[^\p{L}\p{N}\s-]/gu, '')
     .replace(/\s+/g, ' ')
