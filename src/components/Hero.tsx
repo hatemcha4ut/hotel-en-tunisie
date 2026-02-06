@@ -217,7 +217,7 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
             <CityAutocomplete
               selectedCityId={searchParams.cityId}
               placeholder={t('search.selectCity', language)}
-              cities={cities.length ? cities : undefined}
+              cities={cities}
               onSelect={(value) => setSearchParams({ ...searchParams, cityId: value })}
             />
           </div>

@@ -121,16 +121,16 @@ export const createGuestBooking = async (bookingData: GuestBookingPayload) => {
       )
     }
 
-    const myGoError = getMyGoErrorMessage(data)
-    if (myGoError) {
-      throw new Error(myGoError)
-    }
-
     if (error) {
       if (error.status === 401 || error.status === 403) {
         throw new Error('Session expirée. Veuillez vous reconnecter et réessayer.')
       }
       throw new Error(error?.message || 'Impossible de créer la réservation.')
+    }
+
+    const myGoError = getMyGoErrorMessage(data)
+    if (myGoError) {
+      throw new Error(myGoError)
     }
 
     const paymentUrl = getPaymentUrl(data ?? null)

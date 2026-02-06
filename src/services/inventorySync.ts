@@ -14,7 +14,6 @@ interface InventorySyncHotelsResponse {
 export interface InventorySyncSearchResponse {
   hotels?: Hotel[]
   token?: string
-  Token?: string
 }
 
 export const getMyGoErrorMessage = (payload: unknown): string | null => {
@@ -95,11 +94,18 @@ export const searchInventory = async (
     action: 'search',
     ...payload,
   })
+  const tokenValue = (data as Record<string, unknown> | null)?.token ??
+    (data as Record<string, unknown> | null)?.Token
+  const normalizedData: InventorySyncSearchResponse | null = data
+    ? {
+        hotels: data.hotels ?? [],
+        token: typeof tokenValue === 'string' ? tokenValue : undefined,
+      }
+    : null
   if (import.meta.env.DEV) {
-    const tokenValue = data?.token ?? data?.Token
     console.log(`[Inventory] token présent dans search: ${Boolean(tokenValue)}`)
   }
-  return data ?? null
+  return normalizedData
 }
 
 export const bookInventory = async <T>(
