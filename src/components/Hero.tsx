@@ -174,7 +174,8 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
         setIsCorsError(true)
       }
       
-      const message = err instanceof Error ? err.message : 'Erreur lors de la recherche'
+      const message =
+        err instanceof Error && err.message ? err.message : t('search.errorMessage', language)
       toast.error(message)
       setError(true)
     } finally {

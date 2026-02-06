@@ -55,7 +55,7 @@ const invokeInventorySync = async <T>(
   })
 
   if (error) {
-    throw new Error(error.message || 'Erreur lors de l’appel à inventory-sync.')
+    throw new Error(error.message || 'Inventory sync request failed.')
   }
 
   const myGoError = getMyGoErrorMessage(data)

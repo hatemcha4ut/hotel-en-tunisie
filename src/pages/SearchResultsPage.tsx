@@ -10,6 +10,7 @@ import { ResultsList } from '@/components/ResultsList'
 import { FunnelSimple, ArrowLeft, MagnifyingGlass } from '@phosphor-icons/react'
 import { Hotel, SortOption } from '@/types'
 import { useApp } from '@/contexts/AppContext'
+import { t } from '@/lib/translations'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { fetchHotelsByCity, searchInventory } from '@/services/inventorySync'
@@ -23,7 +24,7 @@ interface SearchResultsPageProps {
 }
 
 export function SearchResultsPage({ onViewHotel, onBack, onNewSearch, initialResults }: SearchResultsPageProps) {
-  const { searchParams } = useApp()
+  const { searchParams, language } = useApp()
   const [hotels, setHotels] = useState<Hotel[]>([])
   const [filteredHotels, setFilteredHotels] = useState<Hotel[]>([])
   const [loading, setLoading] = useState(true)
@@ -64,7 +65,7 @@ export function SearchResultsPage({ onViewHotel, onBack, onNewSearch, initialRes
       } catch (error) {
         console.error('Error loading hotels:', error)
         const message =
-          error instanceof Error ? error.message : 'Erreur lors du chargement des hôtels.'
+          error instanceof Error ? error.message : t('search.errorMessage', language)
         toast.error(message)
       } finally {
         setLoading(false)
