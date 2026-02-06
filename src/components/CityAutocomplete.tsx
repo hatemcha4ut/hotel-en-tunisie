@@ -42,7 +42,10 @@ const getCityLabel = (city: City) => {
 }
 
 const getCitySearchValue = (city: City) =>
-  [city.name, city.region, city.country].filter(Boolean).join(' ')
+  [city.name, city.region, city.country]
+    .map((value) => value?.trim())
+    .filter(Boolean)
+    .join(' ')
 
 export function CityAutocomplete({
   onSelect,
