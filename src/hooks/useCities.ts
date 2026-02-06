@@ -28,7 +28,7 @@ const mapCity = (city: InventoryCity): City | null => {
   const fallbackId = [name, city.Region, city.Country?.Name]
     .map((value) => normalizeLabelValue(value))
     .filter(Boolean)
-    .join('-')
+    .join('|')
 
   return {
     id: city.Id !== null && city.Id !== undefined ? String(city.Id) : fallbackId,
@@ -51,7 +51,7 @@ const sortCities = (cities: City[]) =>
   })
 
 export function useCities() {
-  const [cities, setCities] = useState<City[] | null>(null)
+  const [cities, setCities] = useState<City[] | undefined>(undefined)
   const [error, setError] = useState<Error | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 

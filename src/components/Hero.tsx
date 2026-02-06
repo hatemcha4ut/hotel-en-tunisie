@@ -28,7 +28,6 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(false)
   const [isCorsError, setIsCorsError] = useState(false)
-  const cityOptions = cities ?? undefined
 
   const handleAdultsChange = (roomIndex: number, delta: number) => {
     const newRooms = [...searchParams.rooms]
@@ -194,7 +193,7 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
             <CityAutocomplete
               selectedCityId={searchParams.cityId}
               placeholder={t('search.selectCity', language)}
-              cities={cityOptions}
+              cities={cities}
               onSelect={(value) => setSearchParams({ ...searchParams, cityId: value })}
             />
           </div>
