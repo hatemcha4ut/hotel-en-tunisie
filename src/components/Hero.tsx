@@ -31,6 +31,9 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
   useEffect(() => {
     let isActive = true
     const loadCities = async () => {
+      if (!isActive) {
+        return
+      }
       try {
         const results = await fetchCities()
         if (!isActive) {

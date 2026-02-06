@@ -46,7 +46,7 @@ export function SearchResultsPage({ onViewHotel, onBack, onNewSearch, initialRes
       setLoading(true)
       try {
         let results: Hotel[] = []
-        if (searchParams.searchMode === 'city' && searchParams.cityId) {
+        if (searchParams.cityId) {
           results = await fetchHotelsByCity(searchParams.cityId)
         } else {
           const response = await searchInventory({
