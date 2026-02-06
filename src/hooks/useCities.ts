@@ -18,7 +18,8 @@ interface InventorySyncResponse {
   }
 }
 
-const normalizeLabelValue = (value?: string | null) => value?.trim() || ''
+const normalizeLabelValue = (value?: string | null) =>
+  value?.trim().replace(/\s+/g, ' ') || ''
 
 const mapCity = (city: InventoryCity): City | null => {
   const name = normalizeLabelValue(city.Name)
