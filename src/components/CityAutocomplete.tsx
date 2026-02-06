@@ -22,6 +22,24 @@ const normalizeForSearch = (value: string | null | undefined) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
 
+const getCityLabel = (city: City) => {
+  const region = city.region?.trim()
+  const country = city.country?.trim()
+  if (region && country) {
+    return `${city.name} – ${region} (${country})`
+  }
+  if (region) {
+    return `${city.name} – ${region}`
+  }
+  if (country) {
+    return `${city.name} (${country})`
+  }
+  return city.name
+}
+
+const getCitySearchValue = (city: City) =>
+  [city.name, city.region, city.country].filter(Boolean).join(' ')
+
 export function CityAutocomplete({
   onSelect,
   selectedCityId,
@@ -43,7 +61,7 @@ export function CityAutocomplete({
     }
     const selectedCity = cities.find((city) => city.id === selectedCityId)
     if (selectedCity) {
-      setQuery(selectedCity.name)
+      setQuery(getCityLabel(selectedCity))
     }
   }, [cities, selectedCityId])
 
@@ -52,7 +70,10 @@ export function CityAutocomplete({
     if (!normalizedQuery) {
       return cities
     }
-    return cities.filter((city) => normalizeForSearch(city.name).includes(normalizedQuery))
+    // Match by name/region/country so searches work with all available metadata.
+    return cities.filter((city) =>
+      normalizeForSearch(getCitySearchValue(city)).includes(normalizedQuery)
+    )
   }, [cities, query])
 
   const listId = `${listboxId}-listbox`
@@ -63,7 +84,7 @@ export function CityAutocomplete({
   const activeOptionId = activeOption ? `${listboxId}-option-${activeOption.id}` : undefined
 
   const handleSelect = (city: City) => {
-    setQuery(city.name)
+    setQuery(getCityLabel(city))
     setIsOpen(false)
     onSelect(city.id)
   }
@@ -187,7 +208,7 @@ export function CityAutocomplete({
               onMouseEnter={() => setHighlightedIndex(index)}
               onClick={() => handleSelect(city)}
             >
-              {city.name}
+              {getCityLabel(city)}
             </li>
           ))}
         </ul>

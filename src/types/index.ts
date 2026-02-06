@@ -39,7 +39,8 @@ export interface MyGoHotel {
 export interface City {
   id: string
   name: string
-  country: string
+  region?: string
+  country?: string
 }
 
 export interface RoomGuests {
