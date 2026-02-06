@@ -66,6 +66,10 @@ export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
       : HOTEL_FALLBACK_IMAGE
     : hotel.image || HOTEL_FALLBACK_IMAGE
   const price = isMyGoHotel(hotel) ? hotel.MinPrice : hotel.price
+  const onRequestOnly = !isMyGoHotel(hotel) && Boolean(hotel.onRequestOnly)
+  const hasPrice = isMyGoHotel(hotel)
+    ? Number.isFinite(price)
+    : hotel.hasPrice ?? Number.isFinite(price)
   const hotelId = isMyGoHotel(hotel) ? getMyGoHotelIdentifier(hotel) : hotel.id
   
   const handleImageError = useCallback(
@@ -113,13 +117,27 @@ export function HotelCard({ hotel, onViewDetails }: HotelCardProps) {
         <div className="flex items-center justify-between pt-4 border-t border-border">
           <div>
             <div className="text-sm text-muted-foreground">{t('common.from', language)}</div>
-            <div className="text-2xl font-bold text-primary">
-              {price}{' '}
-              <span className="text-sm font-normal text-muted-foreground">
-                {t('common.currency', language)}
-              </span>
-            </div>
-            <div className="text-xs text-muted-foreground">{t('common.perNight', language)}</div>
+            {hasPrice ? (
+              <>
+                <div className="text-2xl font-bold text-primary">
+                  {price}{' '}
+                  <span className="text-sm font-normal text-muted-foreground">
+                    {t('common.currency', language)}
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground">{t('common.perNight', language)}</div>
+              </>
+            ) : (
+              <div className="text-base font-semibold text-primary">
+                <span aria-hidden="true">-</span>
+                <span className="sr-only">{t('common.priceUnavailable', language)}</span>
+              </div>
+            )}
+            {onRequestOnly && (
+              <div className="text-xs text-muted-foreground">
+                {t('common.onRequest', language)}
+              </div>
+            )}
           </div>
           <Button onClick={() => onViewDetails(hotelId)}>
             {t('common.viewAvailability', language)}

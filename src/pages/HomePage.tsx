@@ -6,12 +6,13 @@ import { DealsSection } from '@/components/DealsSection'
 import { ResultsList } from '@/components/ResultsList'
 import { api } from '@/lib/api'
 import { Hotel } from '@/types'
+import type { SearchHotelsResult } from '@/services/searchHotels'
 import { useApp } from '@/contexts/AppContext'
 
 interface HomePageProps {
   onSearch: () => void
   onViewHotel: (hotelId: string) => void
-  onResultsFound: (hotels: Hotel[]) => void
+  onResultsFound: (results: SearchHotelsResult) => void
 }
 
 export function HomePage({ onSearch, onViewHotel, onResultsFound }: HomePageProps) {

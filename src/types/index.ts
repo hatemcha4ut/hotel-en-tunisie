@@ -11,6 +11,8 @@ export interface Hotel {
   image: string
   images: string[]
   price: number
+  hasPrice?: boolean
+  onRequestOnly?: boolean
   amenities: string[]
   boardingType: string[]
   latitude?: number
