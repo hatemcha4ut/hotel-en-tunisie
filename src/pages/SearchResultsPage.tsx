@@ -8,11 +8,12 @@ import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { ResultsList } from '@/components/ResultsList'
 import { FunnelSimple, ArrowLeft, MagnifyingGlass } from '@phosphor-icons/react'
-import { api } from '@/lib/api'
 import { Hotel, SortOption } from '@/types'
 import { useApp } from '@/contexts/AppContext'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import { fetchHotelsByCity, searchInventory } from '@/services/inventorySync'
+import { toast } from 'sonner'
 
 interface SearchResultsPageProps {
   onViewHotel: (hotelId: string) => void
@@ -44,18 +45,27 @@ export function SearchResultsPage({ onViewHotel, onBack, onNewSearch, initialRes
     const loadHotels = async () => {
       setLoading(true)
       try {
-        const results = await api.searchHotels({
-          cityId: searchParams.cityId,
-          hotelName: searchParams.hotelName,
-          checkIn: searchParams.checkIn ? format(searchParams.checkIn, 'yyyy-MM-dd') : undefined,
-          checkOut: searchParams.checkOut ? format(searchParams.checkOut, 'yyyy-MM-dd') : undefined,
-        })
+        let results: Hotel[] = []
+        if (searchParams.searchMode === 'city' && searchParams.cityId) {
+          results = await fetchHotelsByCity(searchParams.cityId)
+        } else {
+          const response = await searchInventory({
+            cityId: searchParams.cityId,
+            hotelName: searchParams.hotelName,
+            checkIn: searchParams.checkIn ? format(searchParams.checkIn, 'yyyy-MM-dd') : undefined,
+            checkOut: searchParams.checkOut ? format(searchParams.checkOut, 'yyyy-MM-dd') : undefined,
+          })
+          results = Array.isArray(response?.hotels) ? response?.hotels : []
+        }
         setHotels(results)
         setFilteredHotels(results)
         setPriceRange([0, 500])
         setSelectedStars([])
       } catch (error) {
         console.error('Error loading hotels:', error)
+        const message =
+          error instanceof Error ? error.message : 'Erreur lors du chargement des hôtels.'
+        toast.error(message)
       } finally {
         setLoading(false)
       }

@@ -12,8 +12,8 @@ import { MagnifyingGlass, Users, Minus, Plus, X } from '@phosphor-icons/react'
 import { format } from 'date-fns'
 import { useApp } from '@/contexts/AppContext'
 import { t } from '@/lib/translations'
-import { Hotel } from '@/types'
-import { apiClient } from '@/services/apiClient'
+import { City, Hotel } from '@/types'
+import { fetchCities, searchInventory } from '@/services/inventorySync'
 import { toast } from 'sonner'
 
 interface SearchWidgetProps {
@@ -26,6 +26,27 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(false)
   const [isCorsError, setIsCorsError] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [cities, setCities] = useState<City[]>([])
+
+  useEffect(() => {
+    let isActive = true
+    const loadCities = async () => {
+      try {
+        const results = await fetchCities()
+        if (!isActive) {
+          return
+        }
+        setCities(results)
+      } catch (err) {
+        console.error('Error loading cities:', err)
+      }
+    }
+    loadCities()
+    return () => {
+      isActive = false
+    }
+  }, [])
 
   const handleAdultsChange = (roomIndex: number, delta: number) => {
     const newRooms = [...searchParams.rooms]
@@ -119,6 +140,7 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
     setIsLoading(true)
     setError(false)
     setIsCorsError(false)
+    setErrorMessage(null)
     
     const searchPayload = {
       cityId: searchParams.cityId,
@@ -131,7 +153,8 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
     console.log('[Search] Request start')
     
     try {
-      const results = await apiClient.searchHotels(searchPayload)
+      const response = await searchInventory(searchPayload)
+      const results = Array.isArray(response?.hotels) ? response?.hotels : []
       console.log('[Search] Request end - Results count:', results.length)
       onResultsFound(results)
       onSearch()
@@ -153,6 +176,9 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
         setIsCorsError(true)
       }
       
+      const message = err instanceof Error ? err.message : 'Erreur lors de la recherche'
+      setErrorMessage(message)
+      toast.error(message)
       setError(true)
     } finally {
       setIsLoading(false)
@@ -191,6 +217,7 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
             <CityAutocomplete
               selectedCityId={searchParams.cityId}
               placeholder={t('search.selectCity', language)}
+              cities={cities.length ? cities : undefined}
               onSelect={(value) => setSearchParams({ ...searchParams, cityId: value })}
             />
           </div>
@@ -372,7 +399,7 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
       {error && (
         <div className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
           <p className="text-sm text-destructive font-medium">
-            {t('search.errorMessage', language)}
+            {errorMessage ?? t('search.errorMessage', language)}
           </p>
           {isCorsError && (
             <p className="text-xs text-destructive/80 mt-1">
