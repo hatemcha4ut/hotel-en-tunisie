@@ -1,4 +1,5 @@
 import type { User } from '@supabase/supabase-js'
+import { getSupabaseClient } from './supabase'
 
 export interface AuthUser {
   id: string
@@ -27,3 +28,44 @@ export const buildAuthUser = (user: User | null): AuthUser | null => {
     name: `${firstName} ${lastName}`.trim() || metadata.name || fallbackName,
   }
 }
+
+// Auth service functions
+export const signUp = async (email: string, password: string) => {
+  const supabase = getSupabaseClient()
+  return await supabase.auth.signUp({ email, password })
+}
+
+export const signIn = async (email: string, password: string) => {
+  const supabase = getSupabaseClient()
+  return await supabase.auth.signInWithPassword({ email, password })
+}
+
+export const resetPassword = async (email: string) => {
+  const supabase = getSupabaseClient()
+  return await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://www.hotel.com.tn/#/update-password',
+  })
+}
+
+export const updatePassword = async (newPassword: string) => {
+  const supabase = getSupabaseClient()
+  return await supabase.auth.updateUser({ password: newPassword })
+}
+
+export const signOut = async () => {
+  const supabase = getSupabaseClient()
+  return await supabase.auth.signOut()
+}
+
+export const upsertProfile = async (userId: string, whatsappNumber: string) => {
+  const supabase = getSupabaseClient()
+  return await supabase
+    .from('profiles')
+    .upsert({ user_id: userId, whatsapp_number: whatsappNumber })
+}
+
+// Future: OTP email verification
+// export const verifyOtp = async (email: string, token: string) => {
+//   const supabase = getSupabaseClient()
+//   return await supabase.auth.verifyOtp({ email, token, type: 'email' })
+// }

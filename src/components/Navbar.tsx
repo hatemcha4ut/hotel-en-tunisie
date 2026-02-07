@@ -1,20 +1,17 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { List, User } from '@phosphor-icons/react'
+import { List, User, SignOut } from '@phosphor-icons/react'
 import { useApp } from '@/contexts/AppContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { t } from '@/lib/translations'
-import { AuthDialog } from '@/components/AuthDialog'
-import { useAuthUser } from '@/hooks/useAuthUser'
-import type { AuthUser } from '@/lib/auth'
 import hotelCitiesLogo from '@/assets/images/logo hotel.com.tn.svg'
-import { getSupabaseClient } from '@/lib/supabase'
+import { toast } from 'sonner'
 
 export function Navbar() {
   const { language, setLanguage } = useApp()
+  const { user, signOut: authSignOut } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
-  const [authDialogOpen, setAuthDialogOpen] = useState(false)
-  const currentUser = useAuthUser()
 
   const NavLinks = ({ mobile = false }: { mobile?: boolean }) => {
     const handleClick = () => {
@@ -64,16 +61,27 @@ export function Navbar() {
     )
   }
 
-  const handleAuthSuccess = (_user: AuthUser) => {
-    setAuthDialogOpen(false)
-  }
-
   const handleSignOut = async () => {
     try {
-      const supabase = getSupabaseClient()
-      await supabase.auth.signOut()
+      const { error } = await authSignOut()
+      if (error) {
+        toast.error('Erreur lors de la déconnexion')
+      } else {
+        toast.success('Déconnexion réussie')
+        window.location.hash = ''
+        window.location.href = '/'
+      }
     } catch (error) {
       console.error('Erreur lors de la déconnexion', error)
+      toast.error('Erreur lors de la déconnexion')
+    }
+  }
+
+  const handleAuthClick = () => {
+    if (user) {
+      handleSignOut()
+    } else {
+      window.location.hash = '/login'
     }
   }
 
@@ -105,9 +113,19 @@ export function Navbar() {
               ))}
             </div>
 
-            <Button variant="ghost" size="sm" className="hidden md:flex items-center gap-2" onClick={() => currentUser ? handleSignOut() : setAuthDialogOpen(true)}>
-              <User size={18} />
-              {currentUser?.name || t('nav.signIn', language)}
+            <Button variant="ghost" size="sm" className="hidden md:flex items-center gap-2" onClick={handleAuthClick}>
+              {user ? (
+                <>
+                  <User size={18} />
+                  {user.name}
+                  <SignOut size={18} className="ml-2" />
+                </>
+              ) : (
+                <>
+                  <User size={18} />
+                  {t('nav.signIn', language)}
+                </>
+              )}
             </Button>
 
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -140,11 +158,20 @@ export function Navbar() {
                     </div>
                     <Button className="w-full" size="lg" onClick={() => {
                       setIsOpen(false)
-                      if (!currentUser) setAuthDialogOpen(true)
-                      else handleSignOut()
+                      handleAuthClick()
                     }}>
-                      <User size={18} className="mr-2" />
-                      {currentUser?.name || t('nav.signIn', language)}
+                      {user ? (
+                        <>
+                          <User size={18} className="mr-2" />
+                          {user.name}
+                          <SignOut size={18} className="ml-auto" />
+                        </>
+                      ) : (
+                        <>
+                          <User size={18} className="mr-2" />
+                          {t('nav.signIn', language)}
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -153,12 +180,6 @@ export function Navbar() {
           </div>
         </div>
       </div>
-
-      <AuthDialog 
-        open={authDialogOpen} 
-        onOpenChange={setAuthDialogOpen}
-        onAuthSuccess={handleAuthSuccess}
-      />
     </nav>
   )
 }
