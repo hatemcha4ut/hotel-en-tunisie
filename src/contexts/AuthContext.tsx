@@ -25,12 +25,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false)
 
   useEffect(() => {
-    const supabase = getSupabaseClient()
+    let supabase
+    try {
+      supabase = getSupabaseClient()
+    } catch (error) {
+      console.error('Failed to initialize Supabase client:', error)
+      setLoading(false)
+      return
+    }
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(buildAuthUser(session?.user ?? null))
+      setLoading(false)
+    }).catch((error) => {
+      console.error('Failed to get session:', error)
       setLoading(false)
     })
 
