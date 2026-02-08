@@ -13,6 +13,9 @@ interface CityAutocompleteProps {
   placeholder?: string
   cities?: City[]
   className?: string
+  isLoading?: boolean
+  error?: Error | null
+  onRetry?: () => void
 }
 
 const normalizeForSearch = (value: string | null | undefined) =>
@@ -53,6 +56,9 @@ export function CityAutocomplete({
   placeholder = '',
   cities = tunisianCities,
   className,
+  isLoading = false,
+  error = null,
+  onRetry,
 }: CityAutocompleteProps) {
   const [query, setQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
@@ -200,6 +206,14 @@ export function CityAutocomplete({
         aria-controls={listId}
         aria-activedescendant={activeOptionId}
       />
+      {isOpen && isLoading && cities.length === 0 && (
+        <div className="absolute z-10 mt-1 w-full rounded-md border border-border bg-popover py-3 px-3 text-sm shadow-lg">
+          <div className="flex items-center justify-center text-muted-foreground">
+            <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+            Chargement des villes...
+          </div>
+        </div>
+      )}
       {isOpen && filteredCities.length > 0 && (
         <ul
           id={listId}
@@ -227,6 +241,21 @@ export function CityAutocomplete({
             </li>
           ))}
         </ul>
+      )}
+      {error && (
+        <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded-md">
+          <p className="text-xs text-destructive">
+            {error.message}
+          </p>
+          {onRetry && (
+            <button
+              onClick={onRetry}
+              className="mt-1 text-xs text-destructive underline hover:no-underline"
+            >
+              Réessayer
+            </button>
+          )}
+        </div>
       )}
     </div>
   )

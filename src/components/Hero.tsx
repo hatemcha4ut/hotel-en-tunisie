@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,8 +11,7 @@ import { CityAutocomplete } from '@/components/CityAutocomplete'
 import { MagnifyingGlass, Users, Minus, Plus, X } from '@phosphor-icons/react'
 import { useApp } from '@/contexts/AppContext'
 import { t } from '@/lib/translations'
-import { City } from '@/types'
-import { fetchCities } from '@/services/inventorySync'
+import { useCities } from '@/hooks/useCities'
 import { buildSearchRequest, fetchSearchHotels, mapSearchHotelsToList } from '@/services/searchHotels'
 import type { SearchHotelsResult } from '@/services/searchHotels'
 import { toast } from 'sonner'
@@ -27,26 +26,7 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(false)
   const [isCorsError, setIsCorsError] = useState(false)
-  const [cities, setCities] = useState<City[]>([])
-
-  useEffect(() => {
-    let isActive = true
-    const loadCities = async () => {
-      try {
-        const results = await fetchCities()
-        if (!isActive) {
-          return
-        }
-        setCities(results)
-      } catch (err) {
-        console.error('Error loading cities:', err)
-      }
-    }
-    loadCities()
-    return () => {
-      isActive = false
-    }
-  }, [])
+  const { cities, isLoading: citiesLoading, error: citiesError, retry: retryCities } = useCities()
 
   const handleAdultsChange = (roomIndex: number, delta: number) => {
     const newRooms = [...searchParams.rooms]
@@ -224,6 +204,9 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
               placeholder={t('search.selectCity', language)}
               cities={cities}
               onSelect={(value) => setSearchParams({ ...searchParams, cityId: value })}
+              isLoading={citiesLoading}
+              error={citiesError}
+              onRetry={retryCities}
             />
           </div>
         ) : (
