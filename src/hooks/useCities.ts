@@ -1,102 +1,47 @@
 import { useCallback, useEffect, useState } from 'react'
-import { getSupabaseClient } from '@/lib/supabase'
+import { fetchCities } from '@/services/inventorySync'
+import { tunisianCities } from '@/constants/cities'
 import type { City } from '@/types'
 
-interface InventoryCity {
-  Id?: string | number | null
-  Name?: string | null
-  Region?: string | null
-  Country?: {
-    Name?: string | null
-  } | null
-}
-
-interface InventorySyncResponse {
-  success?: boolean
-  data?: {
-    cities?: InventoryCity[]
-  }
-}
-
-const normalizeLabelValue = (value?: string | null) => {
-  const normalized = value?.trim().replace(/\s+/g, ' ')
-  return normalized ? normalized : undefined
-}
-
-const mapCity = (city: InventoryCity): City | null => {
-  const name = normalizeLabelValue(city.Name)
-  if (!name) {
-    return null
-  }
-  const fallbackId = [
-    name,
-    normalizeLabelValue(city.Region),
-    normalizeLabelValue(city.Country?.Name),
-  ]
-    .filter(Boolean)
-    .join('::')
-
-  return {
-    id: city.Id !== null && city.Id !== undefined ? String(city.Id) : fallbackId,
-    name,
-    region: normalizeLabelValue(city.Region),
-    country: normalizeLabelValue(city.Country?.Name),
-  }
-}
-
-const sortCities = (cities: City[]) =>
-  [...cities].sort((first, second) => {
-    const firstPrimary = first.name.toLowerCase()
-    const secondPrimary = second.name.toLowerCase()
-    if (firstPrimary !== secondPrimary) {
-      return firstPrimary.localeCompare(secondPrimary)
-    }
-    const firstSecondary = (first.region || '').toLowerCase()
-    const secondSecondary = (second.region || '').toLowerCase()
-    return firstSecondary.localeCompare(secondSecondary)
-  })
+// Module-level cache so data survives re-mounts
+let cachedCities: City[] | null = null
+let fetchPromise: Promise<City[]> | null = null
 
 export function useCities() {
-  const [cities, setCities] = useState<City[] | undefined>(undefined)
+  const [cities, setCities] = useState<City[]>(cachedCities ?? [])
+  const [isLoading, setIsLoading] = useState(!cachedCities)
   const [error, setError] = useState<Error | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
 
-  const refreshCities = useCallback(async () => {
+  const load = useCallback(async (force = false) => {
+    if (cachedCities && !force) {
+      setCities(cachedCities)
+      setIsLoading(false)
+      return
+    }
     setIsLoading(true)
     setError(null)
-
     try {
-      const supabase = getSupabaseClient()
-      const { data, error: fetchError } = await supabase.functions.invoke<InventorySyncResponse>(
-        'inventory-sync',
-        {
-          body: { action: 'cities' },
-          method: 'POST',
-        }
-      )
-
-      if (fetchError || !data?.success) {
-        const message =
-          fetchError?.message || 'Unable to load cities from inventory sync.'
-        setError(new Error(message))
-        return
+      // Deduplicate concurrent fetches
+      if (!fetchPromise || force) {
+        fetchPromise = fetchCities()
       }
-
-      const responseCities = data.data?.cities
-      const fetchedCities = Array.isArray(responseCities) ? responseCities : []
-      // Only keep cities with a name; region/country are optional and used for search/display.
-      const nextCities = fetchedCities.map(mapCity).filter((city): city is City => Boolean(city))
-      setCities(sortCities(nextCities))
-    } catch (fetchError) {
-      setError(fetchError instanceof Error ? fetchError : new Error('Unable to load cities.'))
+      const results = await fetchPromise
+      cachedCities = results
+      fetchPromise = null
+      setCities(results)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to load cities'))
+      fetchPromise = null
+      // Fallback to static tunisianCities from constants
+      setCities(tunisianCities)
     } finally {
       setIsLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    refreshCities()
-  }, [refreshCities])
+    load()
+  }, [load])
 
-  return { cities, error, isLoading, refreshCities }
+  return { cities, isLoading, error, retry: () => load(true) }
 }
