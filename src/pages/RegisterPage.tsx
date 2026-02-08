@@ -48,9 +48,12 @@ export function RegisterPage({ onNavigate }: RegisterPageProps) {
       // If WhatsApp number is provided, upsert to profiles table
       if (formData.whatsappNumber) {
         try {
-          const { data: sessionData } = await getSupabaseClient().auth.getSession()
-          if (sessionData.session?.user?.id) {
-            await upsertProfile(sessionData.session.user.id, formData.whatsappNumber)
+          const supabase = getSupabaseClient()
+          if (supabase) {
+            const { data: sessionData } = await supabase.auth.getSession()
+            if (sessionData.session?.user?.id) {
+              await upsertProfile(sessionData.session.user.id, formData.whatsappNumber)
+            }
           }
         } catch (profileError) {
           console.error('Error saving WhatsApp number:', profileError)

@@ -43,6 +43,10 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
     }
     try {
       const supabase = getSupabaseClient()
+      if (!supabase) {
+        toast.error('Service d\'authentification non disponible. Veuillez réessayer plus tard.')
+        return
+      }
       const { data, error } = await supabase.auth.signInWithPassword({
         email: loginData.email,
         password: loginData.password,
@@ -91,6 +95,10 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
     if (verificationCode === generatedCode) {
       try {
         const supabase = getSupabaseClient()
+        if (!supabase) {
+          toast.error('Service d\'authentification non disponible. Veuillez réessayer plus tard.')
+          return
+        }
         const { data, error } = await supabase.auth.signUp({
           email: registerData.email,
           password: registerData.password,

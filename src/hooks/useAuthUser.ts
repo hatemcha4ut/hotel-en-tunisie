@@ -9,6 +9,8 @@ export const useAuthUser = () => {
     let unsubscribe: (() => void) | undefined
     try {
       const supabase = getSupabaseClient()
+      if (!supabase) return  // Auth features unavailable
+      
       supabase.auth.getUser()
         .then(({ data, error }) => {
           if (error) {

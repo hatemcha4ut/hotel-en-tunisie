@@ -33,6 +33,17 @@ jobs:
 
       - name: Build project
         run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Verify env injection
+        run: |
+          if ! grep -rq 'supabase.co\|supabase.in' dist/assets/*.js 2>/dev/null; then
+            echo "::error::VITE_SUPABASE_URL was NOT injected into the build. Check that the secret VITE_SUPABASE_URL is configured in repository settings."
+            exit 1
+          fi
+          echo "✅ Supabase URL found in build output"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

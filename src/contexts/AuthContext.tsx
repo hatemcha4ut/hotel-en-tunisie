@@ -25,11 +25,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false)
 
   useEffect(() => {
-    let supabase
-    try {
-      supabase = getSupabaseClient()
-    } catch (error) {
-      console.error('Failed to initialize Supabase client:', error)
+    const supabase = getSupabaseClient()
+    if (!supabase) {
+      console.warn('[AuthProvider] Supabase not configured — auth features disabled.')
       setLoading(false)
       return
     }
