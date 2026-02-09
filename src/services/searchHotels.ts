@@ -136,6 +136,9 @@ export const mapSearchHotelsToList = (hotels: SearchHotel[]): Hotel[] =>
 
 export const fetchSearchHotels = async (params: SearchRequest): Promise<SearchResponse> => {
   const supabase = getSupabaseClient()
+  if (!supabase) {
+    throw new Error('Service de recherche non disponible. Configuration manquante.')
+  }
   const { data, error } = await supabase.functions.invoke<SearchResponse>('search-hotels', {
     body: params,
   })

@@ -129,6 +129,11 @@ export function BookingPage({ hotel, room, rooms, onBack, onComplete, onNewSearc
     setProcessing(true)
     try {
       const supabase = getSupabaseClient()
+      if (!supabase) {
+        toast.error('Service d\'authentification non disponible. Veuillez réessayer plus tard.')
+        setProcessing(false)
+        return
+      }
       const { error } = await supabase.auth.signInAnonymously()
       if (error) {
         throw error

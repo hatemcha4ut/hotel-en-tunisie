@@ -10,6 +10,7 @@
  */
 import { getSupabaseClient } from '@/lib/supabase'
 import { getMyGoErrorMessage } from '@/services/inventorySync'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type { GuestDetails, Hotel, Room, SearchParams } from '@/types'
 
 export interface GuestBookingPayload {
@@ -33,7 +34,7 @@ interface GuestBookingResponse {
 const getPaymentUrl = (payload: GuestBookingResponse | null) =>
   payload?.paymentUrl ?? payload?.payment_url
 
-const ensureSession = async (supabase: ReturnType<typeof getSupabaseClient>) => {
+const ensureSession = async (supabase: SupabaseClient) => {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
 
   if (sessionError) {
@@ -67,6 +68,10 @@ const ensureSession = async (supabase: ReturnType<typeof getSupabaseClient>) => 
 export const createGuestBooking = async (bookingData: GuestBookingPayload) => {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
   const supabase = getSupabaseClient()
+  
+  if (!supabase) {
+    throw new Error('Service de réservation non disponible. Configuration manquante.')
+  }
 
   const payload = {
     hotelId: bookingData.hotelId,

@@ -49,6 +49,9 @@ const invokeInventorySyncAction = async <T>(
   headers?: Record<string, string>
 ) => {
   const supabase = getSupabaseClient()
+  if (!supabase) {
+    throw new Error('Service non disponible. Configuration manquante.')
+  }
   const { data, error } = await supabase.functions.invoke<T>('inventory-sync', {
     body: payload,
     headers,

@@ -133,6 +133,9 @@ export function ConfirmationPage({ reference, onHome, onNewSearch }: Confirmatio
         }
 
         const supabase = getSupabaseClient()
+        if (!supabase) {
+          throw new Error('Service non disponible. Configuration manquante.')
+        }
         const { data, error } = await supabase.functions.invoke('get-confirmation', {
           body: { confirmation_token: token },
         })
@@ -161,6 +164,10 @@ export function ConfirmationPage({ reference, onHome, onNewSearch }: Confirmatio
     const pollInterval = setInterval(async () => {
       try {
         const supabase = getSupabaseClient()
+        if (!supabase) {
+          console.warn('Polling stopped: Supabase not configured')
+          return
+        }
         const { data, error } = await supabase.functions.invoke('get-confirmation', {
           body: { confirmation_token: confirmationToken },
         })
