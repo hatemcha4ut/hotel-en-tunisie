@@ -58,6 +58,7 @@ export function BookingPage({ hotel, room, rooms, onBack, onComplete, onNewSearc
   const [authDialogOpen, setAuthDialogOpen] = useState(false)
   const currentUser = useAuthUser()
   const [isGuestMode, setIsGuestMode] = useState(false)
+  const [bookingError, setBookingError] = useState<string>('')
   
   // E.164 WhatsApp validation
   const validateWhatsApp = (number: string): boolean => {
@@ -749,6 +750,32 @@ export function BookingPage({ hotel, room, rooms, onBack, onComplete, onNewSearc
                     <p className="text-sm text-muted-foreground">
                       Cliquez ci-dessous pour générer votre lien de paiement sécurisé.
                     </p>
+                    {bookingError && (
+                      <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-md">
+                        <p className="text-sm text-destructive font-medium mb-3">
+                          {bookingError}
+                        </p>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setStep(2)}
+                            className="flex-1"
+                          >
+                            Retour
+                          </Button>
+                          <Button 
+                            variant="default" 
+                            size="sm" 
+                            onClick={handleSubmit}
+                            disabled={processing}
+                            className="flex-1"
+                          >
+                            Réessayer
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                     <div className="flex gap-4">
                       <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
                         Retour
