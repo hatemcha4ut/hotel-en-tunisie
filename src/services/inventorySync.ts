@@ -7,6 +7,13 @@ interface InventorySyncCitiesResponse {
   cities?: City[]
 }
 
+interface PublicCitiesApiResponse {
+  items: City[]
+  source?: string
+  cached?: boolean
+  fetchedAt?: string
+}
+
 interface InventorySyncHotelsResponse {
   hotels?: Hotel[]
 }
@@ -70,23 +77,59 @@ const invokeInventorySyncAction = async <T>(
 }
 
 export const fetchCities = async (): Promise<City[]> => {
+  const PUBLIC_API_ENDPOINT = 'https://api.hotel.com.tn/static/cities'
+  
   try {
-    const data = await invokeInventorySyncAction<InventorySyncCitiesResponse>({ action: 'cities' })
-    const cities = data?.cities ?? []
-    if (import.meta.env.DEV) {
-      console.log(`[Inventory] cities loaded: ${cities.length}`)
+    // Use public API endpoint instead of Supabase edge function
+    const response = await fetch(PUBLIC_API_ENDPOINT, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
+
+    const data: PublicCitiesApiResponse = await response.json()
+    const cities = data?.items ?? []
+    
+    if (import.meta.env.DEV) {
+      console.log(`[Inventory] cities loaded: ${cities.length}`, {
+        source: data.source,
+        cached: data.cached,
+        fetchedAt: data.fetchedAt,
+        etag: response.headers.get('ETag'),
+        cacheControl: response.headers.get('Cache-Control'),
+      })
+    }
+    
     return cities
   } catch (error) {
     if (import.meta.env.DEV) {
-      console.error('[Inventory] Failed to fetch cities:', {
-        message: error instanceof Error ? error.message : String(error),
-        error,
+      console.error('[Inventory] Failed to fetch cities from public API:', {
+        error: error instanceof Error ? error.message : error,
+        endpoint: PUBLIC_API_ENDPOINT,
         timestamp: new Date().toISOString(),
-        hint: 'Check that VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set correctly',
       })
     }
-    throw error
+    
+    // Fallback: try Supabase edge function for backward compatibility
+    try {
+      const data = await invokeInventorySyncAction<InventorySyncCitiesResponse>({ action: 'cities' })
+      const cities = data?.cities ?? []
+      if (import.meta.env.DEV) {
+        console.log(`[Inventory] cities loaded from fallback: ${cities.length}`)
+      }
+      return cities
+    } catch (fallbackError) {
+      if (import.meta.env.DEV) {
+        console.error('[Inventory] Fallback also failed:', fallbackError)
+      }
+      // Re-throw the original error to trigger fallback to static cities
+      throw error
+    }
   }
 }
 
