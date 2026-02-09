@@ -86,6 +86,7 @@ export function BookingPage({ hotel, room, rooms, onBack, onComplete, onNewSearc
   
   const handleSubmit = async () => {
     setProcessing(true)
+    setBookingError('')
     try {
       if (!currentUser && !isGuestMode) {
         throw new Error('Veuillez vous connecter ou choisir le mode invité.')
@@ -108,7 +109,9 @@ export function BookingPage({ hotel, room, rooms, onBack, onComplete, onNewSearc
         totalAmount,
       })
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erreur lors de la réservation')
+      const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la réservation'
+      setBookingError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setProcessing(false)
     }
