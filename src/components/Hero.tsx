@@ -185,7 +185,7 @@ export function SearchWidget({ onSearch, onResultsFound }: SearchWidgetProps) {
       <div className="flex items-center gap-2 mb-6">
         <Button
           variant={searchParams.searchMode === 'city' ? 'default' : 'outline'}
-          onClick={() => setSearchParams({ ...searchParams, searchMode: 'city', hotelName: '' })}
+          onClick={() => setSearchParams({ ...searchParams, searchMode: 'city', hotelName: undefined })}
           className="flex-1"
         >
           {t('search.searchByCity', language)}
