@@ -93,8 +93,24 @@ export const fetchCities = async (): Promise<City[]> => {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
 
-    const data: PublicCitiesApiResponse = await response.json()
-    const cities = data?.items ?? []
+    const rawData: unknown = await response.json()
+
+    if (!rawData || typeof rawData !== 'object') {
+      throw new Error('Invalid cities payload: response is not an object')
+    }
+
+    const data = rawData as Partial<PublicCitiesApiResponse> & Record<string, unknown>
+    const items = (data as Record<string, unknown>).items
+
+    if (!Array.isArray(items)) {
+      throw new Error('Invalid cities payload: "items" is not an array')
+    }
+
+    if (!items.every((item) => item && typeof item === 'object')) {
+      throw new Error('Invalid cities payload: "items" must contain objects')
+    }
+
+    const cities = items as City[]
     
     if (import.meta.env.DEV) {
       console.log(`[Inventory] cities loaded: ${cities.length}`, {
