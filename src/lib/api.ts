@@ -4,6 +4,11 @@ import { getApiBaseUrl, parseHttpError, getUserFriendlyErrorMessage } from '@/li
 // Note: API calls should go through Supabase Edge Functions for security
 // Direct API calls with credentials are removed to prevent credential exposure
 
+// Constants for hotel details
+const HOTEL_TYPE = 'hotel'
+const DEFAULT_CHECK_IN_TIME = '15:00'
+const DEFAULT_CHECK_OUT_TIME = '12:00'
+
 /**
  * MyGo hotel detail API response interface (flexible to handle various field name casing)
  */
@@ -111,7 +116,7 @@ function mapMyGoHotelToFrontend(myGoHotel: MyGoHotelResponse): Hotel {
                 isValidNumber(myGoHotel.MinPrice) ? myGoHotel.MinPrice : 0
   
   return {
-    type: 'hotel',
+    type: HOTEL_TYPE,
     id: String(hotelId),
     name,
     city,
@@ -136,9 +141,9 @@ function mapMyGoHotelToFrontend(myGoHotel: MyGoHotelResponse): Hotel {
     longitude: isValidNumber(myGoHotel.longitude) ? myGoHotel.longitude :
                isValidNumber(myGoHotel.Longitude) ? myGoHotel.Longitude : undefined,
     checkInTime: normalizeToNonEmptyString(myGoHotel.checkInTime) ||
-                 normalizeToNonEmptyString(myGoHotel.CheckInTime) || '15:00',
+                 normalizeToNonEmptyString(myGoHotel.CheckInTime) || DEFAULT_CHECK_IN_TIME,
     checkOutTime: normalizeToNonEmptyString(myGoHotel.checkOutTime) ||
-                  normalizeToNonEmptyString(myGoHotel.CheckOutTime) || '12:00',
+                  normalizeToNonEmptyString(myGoHotel.CheckOutTime) || DEFAULT_CHECK_OUT_TIME,
   }
 }
 

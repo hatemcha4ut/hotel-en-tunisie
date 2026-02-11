@@ -194,6 +194,10 @@ export const fetchSearchHotels = async (params: SearchRequest): Promise<SearchRe
     return data
   } catch (err) {
     console.error('Direct API search error:', err)
+    // If error is already a user-friendly Error from parseHttpError, preserve it
+    if (err instanceof Error && err.message) {
+      throw err
+    }
     throw new Error(getUserFriendlyErrorMessage(err, 'search'))
   }
 }
