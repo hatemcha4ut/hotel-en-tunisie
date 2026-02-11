@@ -14,6 +14,18 @@ import { getUserFriendlyErrorMessage } from '@/lib/edgeFunctionErrors'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { GuestDetails, Hotel, Room, SearchParams } from '@/types'
 
+/**
+ * Helper function to safely convert string or number to number
+ */
+const toNumber = (value: unknown): number | undefined => {
+  if (typeof value === 'number') return value
+  if (typeof value === 'string') {
+    const num = Number(value)
+    return isNaN(num) ? undefined : num
+  }
+  return undefined
+}
+
 export interface GuestBookingPayload {
   hotelId: string
   hotel: Hotel
@@ -74,8 +86,9 @@ export const createGuestBooking = async (bookingData: GuestBookingPayload) => {
   }
 
   // Transform searchParams to match backend contract
+  const cityIdNum = toNumber(bookingData.searchParams.cityId)
   const backendSearchParams = {
-    cityId: bookingData.searchParams.cityId ? Number(bookingData.searchParams.cityId) : undefined,
+    cityId: cityIdNum,
     checkIn: bookingData.searchParams.checkIn,
     checkOut: bookingData.searchParams.checkOut,
     rooms: bookingData.searchParams.rooms,
@@ -83,10 +96,19 @@ export const createGuestBooking = async (bookingData: GuestBookingPayload) => {
   }
 
   // Transform room to selectedOffer structure
+  const hotelIdNum = toNumber(bookingData.hotelId)
+  const roomIdNum = toNumber(bookingData.room.id)
+  const boardingIdNum = toNumber(bookingData.room.selectedBoarding || bookingData.room.boardingType)
+  
+  // Validate all required IDs are valid numbers
+  if (hotelIdNum === undefined || roomIdNum === undefined || boardingIdNum === undefined) {
+    throw new Error('Données de réservation invalides. Veuillez réessayer.')
+  }
+  
   const selectedOffer = {
-    hotelId: Number(bookingData.hotelId),
-    roomId: Number(bookingData.room.id),
-    boardingId: Number(bookingData.room.selectedBoarding || bookingData.room.boardingType),
+    hotelId: hotelIdNum,
+    roomId: roomIdNum,
+    boardingId: boardingIdNum,
   }
 
   // Transform guestDetails to customer structure

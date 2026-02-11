@@ -88,8 +88,8 @@ const transformSelectedOffer = (hotelId: unknown, room: any) => {
   const roomIdNum = toNumber(room.id)
   const boardingIdNum = toNumber(room.selectedBoarding || room.boardingType)
   
-  // Only return if all IDs are valid numbers
-  if (hotelIdNum && roomIdNum && boardingIdNum) {
+  // Only return if all IDs are valid numbers (check for undefined, not falsiness)
+  if (hotelIdNum !== undefined && roomIdNum !== undefined && boardingIdNum !== undefined) {
     return {
       hotelId: hotelIdNum,
       roomId: roomIdNum,
