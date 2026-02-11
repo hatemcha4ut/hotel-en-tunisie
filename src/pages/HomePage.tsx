@@ -16,6 +16,12 @@ interface HomePageProps {
   onResultsFound: (results: SearchHotelsResult) => void
 }
 
+// Constants for popular hotels section
+const POPULAR_HOTELS_CHECKIN_DAYS = 7  // Days from today for check-in
+const POPULAR_HOTELS_CHECKOUT_DAYS = 10 // Days from today for check-out
+const POPULAR_HOTELS_CITY_ID = 1 // Tunis
+const POPULAR_HOTELS_COUNT = 6
+
 export function HomePage({ onSearch, onViewHotel, onResultsFound }: HomePageProps) {
   const [popularHotels, setPopularHotels] = useState<Hotel[]>([])
   const [loading, setLoading] = useState(true)
@@ -23,19 +29,19 @@ export function HomePage({ onSearch, onViewHotel, onResultsFound }: HomePageProp
   useEffect(() => {
     const loadPopularHotels = async () => {
       try {
-        // Fetch hotels from Tunis (cityId: 1) for the popular hotels section
-        const checkIn = format(addDays(new Date(), 7), 'yyyy-MM-dd')
-        const checkOut = format(addDays(new Date(), 10), 'yyyy-MM-dd')
+        // Fetch hotels from Tunis for the popular hotels section
+        const checkIn = format(addDays(new Date(), POPULAR_HOTELS_CHECKIN_DAYS), 'yyyy-MM-dd')
+        const checkOut = format(addDays(new Date(), POPULAR_HOTELS_CHECKOUT_DAYS), 'yyyy-MM-dd')
         
         const response = await fetchSearchHotels({
-          cityId: 1, // Tunis
+          cityId: POPULAR_HOTELS_CITY_ID,
           checkIn,
           checkOut,
           rooms: [{ adults: 2 }],
         })
         
         const hotels = mapSearchHotelsToList(response.hotels)
-        setPopularHotels(hotels.slice(0, 6))
+        setPopularHotels(hotels.slice(0, POPULAR_HOTELS_COUNT))
       } catch (error) {
         console.error('Error loading popular hotels:', error)
         // Don't show error to user - just leave empty state
