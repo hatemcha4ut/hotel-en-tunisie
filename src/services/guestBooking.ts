@@ -73,17 +73,38 @@ export const createGuestBooking = async (bookingData: GuestBookingPayload) => {
     throw new Error('Service de réservation non disponible. Configuration manquante.')
   }
 
+  // Transform searchParams to match backend contract
+  const backendSearchParams = {
+    cityId: bookingData.searchParams.cityId ? parseInt(bookingData.searchParams.cityId, 10) : undefined,
+    checkIn: bookingData.searchParams.checkIn,
+    checkOut: bookingData.searchParams.checkOut,
+    rooms: bookingData.searchParams.rooms,
+    currency: bookingData.searchParams.currency || 'TND',
+  }
+
+  // Transform room to selectedOffer structure
+  const selectedOffer = {
+    hotelId: parseInt(bookingData.hotelId, 10),
+    roomId: parseInt(bookingData.room.id, 10),
+    boardingId: parseInt(bookingData.room.selectedBoarding || bookingData.room.boardingType, 10),
+    views: undefined, // Optional: can be added if available in room data
+    supplements: undefined, // Optional: can be added if available in room data
+  }
+
+  // Transform guestDetails to customer structure
+  const customer = {
+    firstName: bookingData.guestDetails.firstName,
+    lastName: bookingData.guestDetails.lastName,
+    email: bookingData.guestDetails.email,
+    phone: `${bookingData.guestDetails.countryCode}${bookingData.guestDetails.phone}`,
+    nationality: bookingData.guestDetails.nationality,
+  }
+
   const payload = {
-    hotelId: bookingData.hotelId,
-    hotel: bookingData.hotel,
-    rooms: bookingData.rooms,
-    selectedOffer: bookingData.room,
-    searchParams: bookingData.searchParams,
-    guest: bookingData.guestDetails,
-    contact: {
-      email: bookingData.guestDetails.email,
-      phone: `${bookingData.guestDetails.countryCode}${bookingData.guestDetails.phone}`,
-    },
+    searchParams: backendSearchParams,
+    selectedOffer,
+    customer,
+    specialRequests: bookingData.guestDetails.specialRequests,
     guest_whatsapp_number: bookingData.guestDetails.guestWhatsAppNumber,
     nights: bookingData.nights,
     totalAmount: bookingData.totalAmount,
@@ -124,6 +145,36 @@ export const createGuestBooking = async (bookingData: GuestBookingPayload) => {
       if (error.status === 401 || error.status === 403) {
         throw new Error('Session expirée. Veuillez vous reconnecter et réessayer.')
       }
+      
+      // Parse specific validation errors (400/422)
+      if (error.status === 400 || error.status === 422) {
+        const errorBody = typeof error.context === 'object' ? error.context : null
+        const errorMessage = error.message || ''
+        
+        // Check for cityId validation errors
+        if (errorMessage.includes('cityId') || errorMessage.includes('city') || errorMessage.includes('Invalid city')) {
+          throw new Error('Sélection de ville invalide. Veuillez choisir une autre ville.')
+        }
+        
+        // Check for room availability errors from MyGo
+        if (errorMessage.includes('no longer available') || 
+            errorMessage.includes('not available') || 
+            errorMessage.includes('unavailable') ||
+            errorMessage.includes('sold out')) {
+          throw new Error('Cette chambre n\'est plus disponible. Veuillez sélectionner une autre chambre.')
+        }
+        
+        // Check for price mismatch errors
+        if (errorMessage.includes('price') || errorMessage.includes('amount')) {
+          throw new Error('Le prix a changé. Veuillez vérifier les détails et réessayer.')
+        }
+        
+        // Return the specific error message if available
+        if (errorMessage && errorMessage.trim()) {
+          throw new Error(errorMessage)
+        }
+      }
+      
       // Use user-friendly error message for Edge Function errors
       throw new Error(getUserFriendlyErrorMessage(error, 'booking'))
     }

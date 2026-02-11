@@ -191,9 +191,36 @@ export const prebookRoom = async (
   payload: InventorySyncPayload
 ): Promise<PrebookResponse> => {
   try {
+    // Transform payload if it contains old structure
+    let transformedPayload = { ...payload }
+    
+    // Check if we need to transform searchParams and selectedOffer
+    if (payload.searchParams && typeof payload.searchParams === 'object') {
+      const sp = payload.searchParams as any
+      transformedPayload.searchParams = {
+        cityId: sp.cityId ? parseInt(sp.cityId, 10) : undefined,
+        checkIn: sp.checkIn,
+        checkOut: sp.checkOut,
+        rooms: sp.rooms,
+        currency: sp.currency || 'TND',
+      }
+    }
+    
+    // Transform room to selectedOffer if needed
+    if (payload.room && typeof payload.room === 'object') {
+      const room = payload.room as any
+      if (payload.hotelId && room.id) {
+        transformedPayload.selectedOffer = {
+          hotelId: parseInt(String(payload.hotelId), 10),
+          roomId: parseInt(String(room.id), 10),
+          boardingId: parseInt(String(room.selectedBoarding || room.boardingType), 10),
+        }
+      }
+    }
+    
     const data = await invokeInventorySyncAction<PrebookResponse>({
       action: 'prebook',
-      ...payload,
+      ...transformedPayload,
     })
     
     if (data && typeof data === 'object') {
@@ -221,9 +248,48 @@ export const initiateCheckout = async (
   payload: InventorySyncPayload
 ): Promise<CheckoutInitiateResponse> => {
   try {
+    // Transform payload if it contains old structure
+    let transformedPayload = { ...payload }
+    
+    // Check if we need to transform searchParams and selectedOffer
+    if (payload.searchParams && typeof payload.searchParams === 'object') {
+      const sp = payload.searchParams as any
+      transformedPayload.searchParams = {
+        cityId: sp.cityId ? parseInt(sp.cityId, 10) : undefined,
+        checkIn: sp.checkIn,
+        checkOut: sp.checkOut,
+        rooms: sp.rooms,
+        currency: sp.currency || 'TND',
+      }
+    }
+    
+    // Transform room/rooms to selectedOffer if needed
+    if (payload.rooms && Array.isArray(payload.rooms) && payload.rooms.length > 0) {
+      const firstRoom = payload.rooms[0] as any
+      if (payload.hotelId && firstRoom.id) {
+        transformedPayload.selectedOffer = {
+          hotelId: parseInt(String(payload.hotelId), 10),
+          roomId: parseInt(String(firstRoom.id), 10),
+          boardingId: parseInt(String(firstRoom.selectedBoarding || firstRoom.boardingType), 10),
+        }
+      }
+    }
+    
+    // Transform guestDetails to customer if present
+    if (payload.guestDetails && typeof payload.guestDetails === 'object') {
+      const gd = payload.guestDetails as any
+      transformedPayload.customer = {
+        firstName: gd.firstName,
+        lastName: gd.lastName,
+        email: gd.email,
+        phone: `${gd.countryCode}${gd.phone}`,
+        nationality: gd.nationality,
+      }
+    }
+    
     const data = await invokeInventorySyncAction<CheckoutInitiateResponse>({
       action: 'checkout-initiate',
-      ...payload,
+      ...transformedPayload,
     })
     
     if (data && typeof data === 'object') {
