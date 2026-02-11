@@ -1,5 +1,6 @@
 import { format } from 'date-fns'
 import { getSupabaseClient } from '@/lib/supabase'
+import { getApiBaseUrl, parseHttpError, getUserFriendlyErrorMessage } from '@/lib/edgeFunctionErrors'
 import type { Hotel, RoomGuests, SearchParams } from '@/types'
 
 type CurrencyCode = 'TND' | 'EUR' | 'USD'
@@ -136,21 +137,51 @@ export const mapSearchHotelsToList = (hotels: SearchHotel[]): Hotel[] =>
 
 export const fetchSearchHotels = async (params: SearchRequest): Promise<SearchResponse> => {
   const supabase = getSupabaseClient()
-  if (!supabase) {
-    throw new Error('Service de recherche non disponible. Configuration manquante.')
-  }
-  const { data, error } = await supabase.functions.invoke<SearchResponse>('search-hotels', {
-    body: params,
-  })
+  
+  // Try Supabase Edge Function first
+  if (supabase) {
+    try {
+      const { data, error } = await supabase.functions.invoke<SearchResponse>('search-hotels', {
+        body: params,
+      })
 
-  if (error) {
-    console.error('search-hotels error', error)
-    throw error
+      if (error) {
+        console.error('search-hotels edge function error:', error)
+        // Fall through to direct API call
+      } else if (data && Array.isArray(data.hotels)) {
+        return data
+      }
+    } catch (err) {
+      console.error('search-hotels edge function exception:', err)
+      // Fall through to direct API call
+    }
   }
 
-  if (!data || !Array.isArray(data.hotels)) {
-    throw new Error('Réponse de recherche invalide.')
-  }
+  // Fallback: Direct API call to Cloudflare Worker
+  try {
+    const apiBaseUrl = getApiBaseUrl()
+    const response = await fetch(`${apiBaseUrl}/hotels/search`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    })
 
-  return data
+    if (!response.ok) {
+      const errorMessage = await parseHttpError(response)
+      throw new Error(errorMessage)
+    }
+
+    const data = await response.json()
+    
+    if (!data || !Array.isArray(data.hotels)) {
+      throw new Error('Réponse de recherche invalide.')
+    }
+
+    return data
+  } catch (err) {
+    console.error('Direct API search error:', err)
+    throw new Error(getUserFriendlyErrorMessage(err, 'search'))
+  }
 }

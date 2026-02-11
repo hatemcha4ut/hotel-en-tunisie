@@ -1,7 +1,100 @@
 import { Hotel, City, Room } from '@/types'
+import { getApiBaseUrl, parseHttpError, getUserFriendlyErrorMessage } from '@/lib/edgeFunctionErrors'
 
 // Note: API calls should go through Supabase Edge Functions for security
 // Direct API calls with credentials are removed to prevent credential exposure
+
+/**
+ * Maps MyGo hotel detail response to frontend Hotel interface
+ */
+function mapMyGoHotelToFrontend(myGoHotel: any): Hotel {
+  const isValidNumber = (value: unknown): value is number =>
+    typeof value === 'number' && Number.isFinite(value)
+  
+  const normalizeToNonEmptyString = (value: unknown) => {
+    if (typeof value !== 'string') return undefined
+    const trimmed = value.trim()
+    return trimmed || undefined
+  }
+
+  // Extract hotel ID (could be in various fields)
+  const hotelId = myGoHotel.id || myGoHotel.Id || myGoHotel.hotelId || myGoHotel.HotelId || '0'
+  
+  // Extract location information
+  const city = normalizeToNonEmptyString(myGoHotel.city) || 
+               normalizeToNonEmptyString(myGoHotel.City) || 
+               normalizeToNonEmptyString(myGoHotel.cityName) || ''
+  
+  const address = normalizeToNonEmptyString(myGoHotel.address) || 
+                  normalizeToNonEmptyString(myGoHotel.Address) || 
+                  city
+  
+  // Extract name
+  const name = normalizeToNonEmptyString(myGoHotel.name) || 
+               normalizeToNonEmptyString(myGoHotel.Name) || 
+               String(hotelId)
+  
+  // Extract images
+  const mainImage = normalizeToNonEmptyString(myGoHotel.image) || 
+                    normalizeToNonEmptyString(myGoHotel.mainPhoto) ||
+                    normalizeToNonEmptyString(myGoHotel.MainPhoto) || ''
+  
+  const imagesArray = Array.isArray(myGoHotel.images)
+    ? myGoHotel.images.filter((img: unknown) => Boolean(normalizeToNonEmptyString(img)))
+    : []
+  
+  const images = imagesArray.length ? imagesArray : mainImage ? [mainImage] : []
+  
+  // Extract amenities
+  const amenities = Array.isArray(myGoHotel.amenities)
+    ? myGoHotel.amenities.filter((a: unknown) => Boolean(normalizeToNonEmptyString(a)))
+    : Array.isArray(myGoHotel.Amenities)
+    ? myGoHotel.Amenities.filter((a: unknown) => Boolean(normalizeToNonEmptyString(a)))
+    : []
+  
+  // Extract boarding types
+  const boardingType = Array.isArray(myGoHotel.boardingType)
+    ? myGoHotel.boardingType.filter((b: unknown) => Boolean(normalizeToNonEmptyString(b)))
+    : Array.isArray(myGoHotel.boardingTypes)
+    ? myGoHotel.boardingTypes.filter((b: unknown) => Boolean(normalizeToNonEmptyString(b)))
+    : []
+  
+  // Extract price
+  const price = isValidNumber(myGoHotel.price) ? myGoHotel.price :
+                isValidNumber(myGoHotel.minPrice) ? myGoHotel.minPrice :
+                isValidNumber(myGoHotel.MinPrice) ? myGoHotel.MinPrice : 0
+  
+  return {
+    type: 'hotel',
+    id: String(hotelId),
+    name,
+    city,
+    address,
+    stars: isValidNumber(myGoHotel.stars) ? myGoHotel.stars : 
+           isValidNumber(myGoHotel.category) ? myGoHotel.category :
+           isValidNumber(myGoHotel.Category) ? myGoHotel.Category : 0,
+    rating: isValidNumber(myGoHotel.rating) ? myGoHotel.rating : 
+            isValidNumber(myGoHotel.Rating) ? myGoHotel.Rating : 0,
+    reviewCount: isValidNumber(myGoHotel.reviewCount) ? myGoHotel.reviewCount :
+                 isValidNumber(myGoHotel.ReviewCount) ? myGoHotel.ReviewCount : 0,
+    description: normalizeToNonEmptyString(myGoHotel.description) ||
+                 normalizeToNonEmptyString(myGoHotel.Description) || '',
+    image: mainImage,
+    images,
+    price,
+    hasPrice: price > 0,
+    amenities,
+    boardingType,
+    latitude: isValidNumber(myGoHotel.latitude) ? myGoHotel.latitude :
+              isValidNumber(myGoHotel.Latitude) ? myGoHotel.Latitude : undefined,
+    longitude: isValidNumber(myGoHotel.longitude) ? myGoHotel.longitude :
+               isValidNumber(myGoHotel.Longitude) ? myGoHotel.Longitude : undefined,
+    checkInTime: normalizeToNonEmptyString(myGoHotel.checkInTime) ||
+                 normalizeToNonEmptyString(myGoHotel.CheckInTime) || '15:00',
+    checkOutTime: normalizeToNonEmptyString(myGoHotel.checkOutTime) ||
+                  normalizeToNonEmptyString(myGoHotel.CheckOutTime) || '12:00',
+  }
+}
 
 const mockCities: City[] = [
   { id: '1', name: 'Tunis', country: 'Tunisia' },
@@ -12,262 +105,6 @@ const mockCities: City[] = [
   { id: '6', name: 'Mahdia', country: 'Tunisia' },
   { id: '7', name: 'Tozeur', country: 'Tunisia' },
   { id: '8', name: 'Sfax', country: 'Tunisia' },
-]
-
-const mockHotels: Hotel[] = [
-  {
-    id: '1',
-    name: 'Hôtel La Badira',
-    city: 'Hammamet',
-    address: 'Zone Touristique, Hammamet',
-    stars: 5,
-    rating: 4.8,
-    reviewCount: 342,
-    description: 'Un complexe hôtelier de luxe sur la plage avec spa de classe mondiale, plusieurs restaurants gastronomiques et architecture mauresque élégante.',
-    image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800&h=600&fit=crop',
-    ],
-    price: 224,
-    amenities: ['WiFi', 'Piscine', 'Spa', 'Restaurant', 'Bar', 'Plage privée', 'Salle de sport', 'Parking'],
-    boardingType: ['Petit-déjeuner', 'Demi-pension', 'Pension complète', 'All Inclusive'],
-    latitude: 36.4,
-    longitude: 10.62,
-    checkInTime: '15:00',
-    checkOutTime: '12:00',
-    promotion: {
-      discount: 20,
-      label: 'Offre Spéciale Été',
-      validUntil: '31 Août 2024',
-      originalPrice: 280
-    }
-  },
-  {
-    id: '2',
-    name: 'Mövenpick Resort & Marine Spa',
-    city: 'Sousse',
-    address: 'BP 71 Port El Kantaoui, Sousse',
-    stars: 5,
-    rating: 4.6,
-    reviewCount: 567,
-    description: 'Resort luxueux en bord de mer offrant des chambres élégantes, un spa marin primé et un accès direct à la marina.',
-    image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&h=600&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1568084680786-a84f91d1153c?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&h=600&fit=crop',
-    ],
-    price: 256,
-    amenities: ['WiFi', 'Piscine', 'Spa', 'Restaurant', 'Club enfants', 'Plage privée', 'Tennis'],
-    boardingType: ['Petit-déjeuner', 'Demi-pension', 'All Inclusive'],
-    latitude: 35.895,
-    longitude: 10.605,
-    checkInTime: '14:00',
-    checkOutTime: '12:00',
-    promotion: {
-      discount: 20,
-      label: 'Réservez tôt et économisez',
-      validUntil: '30 Septembre 2024',
-      originalPrice: 320
-    }
-  },
-  {
-    id: '3',
-    name: 'Dar El Jeld Hotel & Spa',
-    city: 'Tunis',
-    address: '5-10 Rue Dar El Jeld, Medina, Tunis',
-    stars: 5,
-    rating: 4.9,
-    reviewCount: 189,
-    description: 'Boutique hôtel historique dans la médina avec architecture traditionnelle, spa hammam et cuisine tunisienne authentique.',
-    image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&h=600&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800&h=600&fit=crop',
-    ],
-    price: 195,
-    amenities: ['WiFi', 'Spa', 'Restaurant', 'Hammam', 'Terrasse', 'Parking'],
-    boardingType: ['Petit-déjeuner', 'Demi-pension'],
-    latitude: 36.8065,
-    longitude: 10.1815,
-    checkInTime: '15:00',
-    checkOutTime: '11:00',
-  },
-  {
-    id: '4',
-    name: 'Radisson Blu Palace Resort & Thalasso',
-    city: 'Djerba',
-    address: 'Zone Touristique Houmt Souk, Djerba',
-    stars: 5,
-    rating: 4.7,
-    reviewCount: 823,
-    description: 'Resort tout compris avec centre de thalassothérapie, multiple piscines et accès direct à une plage de sable blanc.',
-    image: 'https://images.unsplash.com/photo-1549294413-26f195200c16?w=800&h=600&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1549294413-26f195200c16?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1596436889106-be35e843f974?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1602002418816-5c0aeef426aa?w=800&h=600&fit=crop',
-    ],
-    price: 196,
-    amenities: ['WiFi', 'Piscine', 'Spa', 'Restaurant', 'Bar', 'Plage privée', 'Club enfants', 'Animation'],
-    boardingType: ['Demi-pension', 'Pension complète', 'All Inclusive'],
-    latitude: 33.8076,
-    longitude: 10.8451,
-    checkInTime: '15:00',
-    checkOutTime: '12:00',
-    promotion: {
-      discount: 20,
-      label: 'Séjour Famille - 20% Off',
-      validUntil: '15 Septembre 2024',
-      originalPrice: 245
-    }
-  },
-  {
-    id: '5',
-    name: 'Iberostar Selection Kuriat Palace',
-    city: 'Monastir',
-    address: 'Route Touristique Skanes, Monastir',
-    stars: 5,
-    rating: 4.5,
-    reviewCount: 445,
-    description: 'Complexe familial all-inclusive avec parc aquatique, plusieurs restaurants à thème et animations quotidiennes.',
-    image: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&h=600&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1562790351-d273a961e0e9?w=800&h=600&fit=crop',
-    ],
-    price: 168,
-    amenities: ['WiFi', 'Piscine', 'Parc aquatique', 'Restaurant', 'Club enfants', 'Plage', 'Animation', 'Salle de sport'],
-    boardingType: ['All Inclusive'],
-    latitude: 35.7753,
-    longitude: 10.8263,
-    checkInTime: '14:00',
-    checkOutTime: '12:00',
-    promotion: {
-      discount: 20,
-      label: 'Vacances d\'été All Inclusive',
-      validUntil: '31 Août 2024',
-      originalPrice: 210
-    }
-  },
-  {
-    id: '6',
-    name: 'The Residence Tunis',
-    city: 'Tunis',
-    address: 'Les Côtes de Carthage, Gammarth, Tunis',
-    stars: 5,
-    rating: 4.8,
-    reviewCount: 276,
-    description: 'Hôtel de luxe en bord de mer inspiré du palais tunisien du 19ème siècle avec jardins tropicaux luxuriants.',
-    image: 'https://images.unsplash.com/photo-1559508551-44bff1de756b?w=800&h=600&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1559508551-44bff1de756b?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1584132915807-e9d0c96a3702?w=800&h=600&fit=crop',
-    ],
-    price: 350,
-    amenities: ['WiFi', 'Piscine', 'Spa', 'Restaurant', 'Bar', 'Plage privée', 'Golf', 'Casino'],
-    boardingType: ['Petit-déjeuner', 'Demi-pension', 'Pension complète'],
-    latitude: 37.0892,
-    longitude: 10.2896,
-    checkInTime: '16:00',
-    checkOutTime: '12:00',
-  },
-  {
-    id: '7',
-    name: 'Hasdrubal Thalassa & Spa',
-    city: 'Hammamet',
-    address: 'Route Touristique, Yasmine Hammamet',
-    stars: 5,
-    rating: 4.6,
-    reviewCount: 521,
-    description: 'Resort en bord de mer avec centre de thalassothérapie primé, piscines chauffées et architecture contemporaine.',
-    image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?w=800&h=600&fit=crop',
-    ],
-    price: 212,
-    amenities: ['WiFi', 'Piscine', 'Spa', 'Restaurant', 'Thalasso', 'Plage privée', 'Salle de sport'],
-    boardingType: ['Petit-déjeuner', 'Demi-pension', 'Pension complète', 'All Inclusive'],
-    latitude: 36.4,
-    longitude: 10.6,
-    checkInTime: '15:00',
-    checkOutTime: '11:00',
-    promotion: {
-      discount: 20,
-      label: 'Cure Thalasso Spéciale',
-      validUntil: '30 Septembre 2024',
-      originalPrice: 265
-    }
-  },
-  {
-    id: '8',
-    name: 'Diar Lemdina Hotel',
-    city: 'Hammamet',
-    address: 'Route Touristique, Hammamet',
-    stars: 4,
-    rating: 4.3,
-    reviewCount: 612,
-    description: 'Hôtel authentique conçu comme une médina tunisienne traditionnelle avec architecture locale et ambiance chaleureuse.',
-    image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&h=600&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1566195992011-5f6b21e539aa?w=800&h=600&fit=crop',
-    ],
-    price: 145,
-    amenities: ['WiFi', 'Piscine', 'Restaurant', 'Bar', 'Animation', 'Plage'],
-    boardingType: ['Petit-déjeuner', 'Demi-pension', 'All Inclusive'],
-    latitude: 36.4,
-    longitude: 10.58,
-    checkInTime: '14:00',
-    checkOutTime: '12:00',
-  },
-  {
-    id: '9',
-    name: 'Concorde Green Park Palace',
-    city: 'Tunis',
-    address: 'BP 57 Les Berges du Lac, Tunis',
-    stars: 5,
-    rating: 4.4,
-    reviewCount: 334,
-    description: 'Hôtel moderne dans le quartier des affaires avec installations de conférence, spa et restaurants gastronomiques.',
-    image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&h=600&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&h=600&fit=crop',
-    ],
-    price: 185,
-    amenities: ['WiFi', 'Piscine', 'Spa', 'Restaurant', 'Salle de sport', 'Parking', 'Centre d\'affaires'],
-    boardingType: ['Petit-déjeuner', 'Demi-pension'],
-    latitude: 36.8395,
-    longitude: 10.2388,
-    checkInTime: '15:00',
-    checkOutTime: '12:00',
-  },
-  {
-    id: '10',
-    name: 'Vincci El Mansour',
-    city: 'Mahdia',
-    address: 'Zone Touristique, BP 68, Mahdia',
-    stars: 4,
-    rating: 4.5,
-    reviewCount: 489,
-    description: 'Resort all-inclusive avec animation dynamique, plusieurs piscines et accès direct à une plage de sable fin.',
-    image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&h=600&fit=crop',
-    images: [
-      'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&h=600&fit=crop',
-      'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=800&h=600&fit=crop',
-    ],
-    price: 175,
-    amenities: ['WiFi', 'Piscine', 'Restaurant', 'Bar', 'Animation', 'Plage', 'Club enfants'],
-    boardingType: ['All Inclusive'],
-    latitude: 35.5047,
-    longitude: 11.0622,
-    checkInTime: '14:00',
-    checkOutTime: '12:00',
-  },
 ]
 
 const mockRooms: Room[] = [
@@ -345,59 +182,50 @@ export const api = {
     checkIn?: string
     checkOut?: string
   }): Promise<Hotel[]> => {
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    let filtered = [...mockHotels]
-    
-    if (params.cityId) {
-      const city = mockCities.find(c => c.id === params.cityId)
-      if (city) {
-        filtered = filtered.filter(h => h.city === city.name)
-      }
-    }
-    
-    if (params.hotelName && params.hotelName.trim() !== '') {
-      const searchTerm = params.hotelName
-        .toLowerCase()
-        .trim()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-      
-      filtered = filtered.filter(h => {
-        const hotelName = h.name
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-        const cityName = h.city
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-        const hotelDescription = (h.description || '')
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-        
-        return (
-          hotelName.includes(searchTerm) ||
-          cityName.includes(searchTerm) ||
-          hotelDescription.includes(searchTerm) ||
-          hotelName.split(' ').some(word => word.startsWith(searchTerm)) ||
-          searchTerm.split(' ').some(term => hotelName.includes(term))
-        )
-      })
-    }
-    
-    return filtered
+    // This legacy function is deprecated in favor of fetchSearchHotels in searchHotels.ts
+    // Return empty array as popular hotels should come from backend API
+    console.warn('api.searchHotels is deprecated. Popular hotels feature requires backend API implementation.')
+    return []
   },
 
   getHotelsWithPromotions: async (): Promise<Hotel[]> => {
-    await new Promise(resolve => setTimeout(resolve, 300))
-    return mockHotels.filter(h => h.promotion)
+    // This legacy function is deprecated
+    // Promotions should come from backend API
+    console.warn('api.getHotelsWithPromotions is deprecated. Promotions feature requires backend API implementation.')
+    return []
   },
 
   getHotelDetails: async (hotelId: string): Promise<Hotel | null> => {
-    await new Promise(resolve => setTimeout(resolve, 300))
-    return mockHotels.find(h => h.id === hotelId) || null
+    try {
+      const apiBaseUrl = getApiBaseUrl()
+      const response = await fetch(`${apiBaseUrl}/hotels/detail`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ hotelId: Number(hotelId) }),
+      })
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.error(`Hotel ${hotelId} not found`)
+          return null
+        }
+        const errorMessage = await parseHttpError(response)
+        throw new Error(errorMessage)
+      }
+
+      const data = await response.json()
+      
+      if (!data) {
+        return null
+      }
+
+      return mapMyGoHotelToFrontend(data)
+    } catch (err) {
+      console.error('Error fetching hotel details:', err)
+      throw new Error(getUserFriendlyErrorMessage(err, 'hotel-details'))
+    }
   },
 
   getAvailableRooms: async (hotelId: string, roomCount?: number): Promise<Room[]> => {
