@@ -66,7 +66,7 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
     }
   }
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!registerData.firstName || !registerData.lastName || !registerData.email || 
         !registerData.phone || !registerData.password) {
       toast.error('Veuillez remplir tous les champs obligatoires')
@@ -77,21 +77,55 @@ export function AuthDialog({ open, onOpenChange, onAuthSuccess }: AuthDialogProp
       return
     }
     
-    const code = generateCode()
-    setGeneratedCode(code)
-    
-    if (verificationMethod === 'email') {
-      toast.success(`Code de vérification envoyé à ${registerData.email}`)
-      toast.info(`Code de démonstration: ${code}`)
-    } else {
-      toast.success(`Code de vérification envoyé via WhatsApp au ${registerData.phone}`)
-      toast.info(`Code de démonstration: ${code}`)
+    try {
+      const supabase = getSupabaseClient()
+      if (!supabase) {
+        toast.error('Service d\'authentification non disponible. Veuillez réessayer plus tard.')
+        return
+      }
+      
+      // Direct Supabase signUp - no demo verification codes
+      const { data, error } = await supabase.auth.signUp({
+        email: registerData.email,
+        password: registerData.password,
+        options: {
+          data: {
+            first_name: registerData.firstName,
+            last_name: registerData.lastName,
+            phone: registerData.phone,
+          },
+        },
+      })
+      
+      if (error) {
+        throw error
+      }
+      
+      const authUser = buildAuthUser(data.user)
+      if (!authUser) {
+        throw new Error('Utilisateur non disponible.')
+      }
+      
+      onAuthSuccess?.(authUser)
+      toast.success('Compte créé avec succès!')
+      onOpenChange(false)
+      
+      // Reset form
+      setRegisterData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        password: '',
+        confirmPassword: '',
+      })
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de la création du compte')
     }
-    
-    setStep('verify')
   }
 
   const handleVerify = async () => {
+    // This function is kept for backwards compatibility but not used in production flow
     if (verificationCode === generatedCode) {
       try {
         const supabase = getSupabaseClient()
