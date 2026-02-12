@@ -176,7 +176,7 @@ export const fetchCities = async (): Promise<City[]> => {
       }
       // If we don't have cached data but got 304, this is unusual
       // Treat as error and let useCities handle fallback
-      throw new Error('HTTP 304 but no cached data available')
+      throw new Error('HTTP 304 Not Modified for /static/cities but no cached data available')
     }
 
     if (!response.ok) {
@@ -224,7 +224,7 @@ export const fetchCities = async (): Promise<City[]> => {
         console.log('[Inventory] Fetch/parse failed, using cached cities from module cache', {
           error: error instanceof Error ? error.message : error,
           cachedCount: cachedCitiesData.length,
-          reason: 'Reusing cached cities due to fetch/parse error (might be due to browser cache or network issue)',
+          reason: 'Using cached cities due to fetch/parse error',
         })
       }
       return cachedCitiesData
