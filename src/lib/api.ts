@@ -210,11 +210,6 @@ export const api = {
     }
   },
 
- copilot/resolve-merge-conflicts
-  getAvailableRooms: async (hotelId: string, roomCount?: number): Promise<Room[]> => {
-    console.warn('api.getAvailableRooms() is deprecated. Room data should come from inventory search.')
-
- copilot/fix-frontend-issues
   getAvailableRooms: async (hotelId: string, roomCount?: number): Promise<Room[]> => {
     console.warn('api.getAvailableRooms() is deprecated. Room data should come from inventory search.')
 
@@ -279,13 +274,6 @@ export const api = {
       console.error('Error fetching available rooms:', err)
       throw new Error(getUserFriendlyErrorMessage(err, 'available-rooms'))
     }
-
-  getAvailableRooms: async (hotelId: string): Promise<Room[]> => {
-    // TODO: This should also call backend API in future
-    // For now, return empty array - rooms are in search results
- main
-    return []
- main
   },
 
   createBooking: async (bookingData: any): Promise<{ reference: string }> => {
