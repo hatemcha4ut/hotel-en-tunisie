@@ -8,7 +8,6 @@ import { Hotel } from '@/types'
 import type { SearchHotelsResult } from '@/services/searchHotels'
 import { fetchSearchHotels, mapSearchHotelsToList } from '@/services/searchHotels'
 import { format, addDays } from 'date-fns'
-import { useApp } from '@/contexts/AppContext'
 
 interface HomePageProps {
   onSearch: () => void
