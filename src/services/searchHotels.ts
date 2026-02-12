@@ -1,5 +1,6 @@
 import { format } from 'date-fns'
 import { getSupabaseClient } from '@/lib/supabase'
+import { getApiBaseUrl } from '@/lib/edgeFunctionErrors'
 import type { Hotel, RoomGuests, SearchParams } from '@/types'
 
 type CurrencyCode = 'TND' | 'EUR' | 'USD'
@@ -135,6 +136,8 @@ export const mapSearchHotelsToList = (hotels: SearchHotel[]): Hotel[] =>
   })
 
 export const fetchSearchHotels = async (params: SearchRequest): Promise<SearchResponse> => {
+  const workerUrl = `${getApiBaseUrl()}/hotels/search`
+  
   // Primary: Try Supabase Edge Function
   let supabaseAttempted = false
   try {
@@ -168,14 +171,14 @@ export const fetchSearchHotels = async (params: SearchRequest): Promise<SearchRe
   
   // Log when we're using the fallback
   if (supabaseAttempted) {
-    console.log('Attempting Cloudflare Worker fallback at https://api.hotel.com.tn/hotels/search')
+    console.log('Attempting Cloudflare Worker fallback at', workerUrl)
   } else {
-    console.log('Using Cloudflare Worker at https://api.hotel.com.tn/hotels/search')
+    console.log('Using Cloudflare Worker at', workerUrl)
   }
   
   // Fallback: Direct call to Cloudflare Worker
   try {
-    const response = await fetch('https://api.hotel.com.tn/hotels/search', {
+    const response = await fetch(workerUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
