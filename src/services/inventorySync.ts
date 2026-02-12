@@ -147,6 +147,8 @@ const invokeInventorySyncAction = async <T>(
 }
 
 // Module-level cache for cities to handle 304 Not Modified responses
+// Note: JavaScript is single-threaded, and useCities hook handles concurrent requests
+// via fetchPromise deduplication, so race conditions are not a concern
 let cachedCitiesData: City[] | null = null
 
 export const fetchCities = async (): Promise<City[]> => {
@@ -175,8 +177,8 @@ export const fetchCities = async (): Promise<City[]> => {
       }
       
       // If we don't have cached data but got 304, this shouldn't happen
-      // but fallback gracefully
-      throw new Error('304 Not Modified but no cached cities available')
+      // This indicates the browser sent an If-None-Match header without our cache being populated
+      throw new Error('304 Not Modified received without cached cities. Please refresh the page to fetch fresh data.')
     }
 
     if (!response.ok) {
