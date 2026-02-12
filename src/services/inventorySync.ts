@@ -146,6 +146,9 @@ const invokeInventorySyncAction = async <T>(
   return data
 }
 
+// Module-level cache for cities to handle 304 Not Modified responses
+let cachedCitiesData: City[] | null = null
+
 export const fetchCities = async (): Promise<City[]> => {
   const PUBLIC_API_ENDPOINT = 'https://api.hotel.com.tn/static/cities'
   
@@ -157,6 +160,24 @@ export const fetchCities = async (): Promise<City[]> => {
         'Accept': 'application/json',
       },
     })
+
+    // Handle 304 Not Modified - return cached data
+    if (response.status === 304) {
+      if (import.meta.env.DEV) {
+        console.log('[Inventory] 304 Not Modified - using cached cities', {
+          cached: cachedCitiesData !== null,
+          count: cachedCitiesData?.length ?? 0,
+        })
+      }
+      
+      if (cachedCitiesData) {
+        return cachedCitiesData
+      }
+      
+      // If we don't have cached data but got 304, this shouldn't happen
+      // but fallback gracefully
+      throw new Error('304 Not Modified but no cached cities available')
+    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -180,6 +201,9 @@ export const fetchCities = async (): Promise<City[]> => {
     }
 
     const cities = items as City[]
+    
+    // Cache the cities for future 304 responses
+    cachedCitiesData = cities
     
     if (import.meta.env.DEV) {
       console.log(`[Inventory] cities loaded: ${cities.length}`, {
