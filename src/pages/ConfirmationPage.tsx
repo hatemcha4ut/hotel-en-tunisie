@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { getSupabaseClient } from '@/lib/supabase'
+import { getApiBaseUrl } from '@/lib/edgeFunctionErrors'
 
 interface ConfirmationPageProps {
   reference: string
@@ -165,7 +166,7 @@ export function ConfirmationPage({ reference, onHome, onNewSearch }: Confirmatio
         
         try {
           // Use backend confirmation endpoint if available
-          const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://api.hotel.com.tn'
+          const apiBaseUrl = getApiBaseUrl()
           const response = await fetch(`${apiBaseUrl}/booking/confirmation`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

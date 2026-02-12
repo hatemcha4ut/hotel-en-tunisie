@@ -75,6 +75,7 @@ export function HotelDetailsPage({ hotelId, onBack, onBookRoom, onBookRooms, onN
         // Try to get rooms from multiple sources:
         // 1. From search results context (if available and has rooms)
         // 2. From inventory API
+        // 3. Empty array if both fail (will show empty state in UI)
         let roomsData: Room[] = []
         
         if (hotelFromSearch?.rooms && hotelFromSearch.rooms.length > 0) {

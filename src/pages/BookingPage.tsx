@@ -88,6 +88,16 @@ export function BookingPage({ hotel, room, rooms, onBack, onComplete, onNewSearc
     }
   }
   
+  /**
+   * Get selected boarding type for a room with fallback precedence:
+   * 1. roomBoardings (user selection during booking)
+   * 2. room.selectedBoarding (pre-selected from hotel details)
+   * 3. room.boardingType (default from room data)
+   */
+  const getSelectedBoarding = (roomIndex: number = 0): string | undefined => {
+    return roomBoardings?.[roomIndex] || room.selectedBoarding || room.boardingType
+  }
+  
   const handleSubmit = async () => {
     setProcessing(true)
     setBookingError('')
@@ -125,7 +135,7 @@ export function BookingPage({ hotel, room, rooms, onBack, onComplete, onNewSearc
       }
 
       // Validate selectedBoarding exists
-      const selectedBoarding = roomBoardings?.[0] || room.selectedBoarding || room.boardingType
+      const selectedBoarding = getSelectedBoarding()
       if (!selectedBoarding) {
         throw new Error('Type de pension manquant. Veuillez sélectionner une option de pension.')
       }
