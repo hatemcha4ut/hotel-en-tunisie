@@ -5,17 +5,26 @@ import { FeaturedDestinations } from '@/components/FeaturedDestinations'
 import { WhyBookWithUs } from '@/components/WhyBookWithUs'
 import { DealsSection } from '@/components/DealsSection'
 import { ResultsList } from '@/components/ResultsList'
-import { api } from '@/lib/api'
 import { Hotel } from '@/types'
 import type { SearchHotelsResult } from '@/services/searchHotels'
 import { fetchSearchHotels, mapSearchHotelsToList } from '@/services/searchHotels'
+ copilot/fix-frontend-issues
+import { format, addDays } from 'date-fns'
+
 import { useApp } from '@/contexts/AppContext'
+ main
 
 interface HomePageProps {
   onSearch: () => void
   onViewHotel: (hotelId: string) => void
   onResultsFound: (results: SearchHotelsResult) => void
 }
+
+// Constants for popular hotels section
+const POPULAR_HOTELS_CHECKIN_DAYS = 7  // Days from today for check-in
+const POPULAR_HOTELS_CHECKOUT_DAYS = 10 // Days from today for check-out
+const POPULAR_HOTELS_CITY_ID = 1 // Tunis
+const POPULAR_HOTELS_COUNT = 6
 
 export function HomePage({ onSearch, onViewHotel, onResultsFound }: HomePageProps) {
   const [popularHotels, setPopularHotels] = useState<Hotel[]>([])
@@ -24,6 +33,24 @@ export function HomePage({ onSearch, onViewHotel, onResultsFound }: HomePageProp
   useEffect(() => {
     const loadPopularHotels = async () => {
       try {
+ copilot/fix-frontend-issues
+        // Fetch hotels from Tunis for the popular hotels section
+        const checkIn = format(addDays(new Date(), POPULAR_HOTELS_CHECKIN_DAYS), 'yyyy-MM-dd')
+        const checkOut = format(addDays(new Date(), POPULAR_HOTELS_CHECKOUT_DAYS), 'yyyy-MM-dd')
+        
+        const response = await fetchSearchHotels({
+          cityId: POPULAR_HOTELS_CITY_ID,
+          checkIn,
+          checkOut,
+          rooms: [{ adults: 2 }],
+        })
+        
+        const hotels = mapSearchHotelsToList(response.hotels)
+        setPopularHotels(hotels.slice(0, POPULAR_HOTELS_COUNT))
+      } catch (error) {
+        console.error('Error loading popular hotels:', error)
+        // Don't show error to user - just leave empty state
+
         // Search for hotels in Tunis (cityId=1) for next 7 days
         const today = new Date()
         const checkIn = new Date(today)
@@ -44,6 +71,7 @@ export function HomePage({ onSearch, onViewHotel, onResultsFound }: HomePageProp
       } catch (error) {
         console.error('Error loading popular hotels:', error)
         // Don't show error to user, just show empty list
+ main
         setPopularHotels([])
       } finally {
         setLoading(false)
