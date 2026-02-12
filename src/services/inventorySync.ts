@@ -146,9 +146,10 @@ const invokeInventorySyncAction = async <T>(
   return data
 }
 
-// Module-level cache for cities to handle 304 Not Modified responses
-// Note: JavaScript is single-threaded, and useCities hook handles concurrent requests
-// via fetchPromise deduplication, so race conditions are not a concern
+// Module-level cache for cities to handle browser-cached responses
+// Note: Browser fetch() API handles 304 Not Modified internally and never exposes it to JS.
+// When 304 occurs, browser returns 200 with cached data, which may fail validation.
+// This cache ensures we can fall back to last known good data in such cases.
 let cachedCitiesData: City[] | null = null
 
 export const fetchCities = async (): Promise<City[]> => {
@@ -162,24 +163,6 @@ export const fetchCities = async (): Promise<City[]> => {
         'Accept': 'application/json',
       },
     })
-
-    // Handle 304 Not Modified - return cached data
-    if (response.status === 304) {
-      if (import.meta.env.DEV) {
-        console.log('[Inventory] 304 Not Modified - using cached cities', {
-          cached: cachedCitiesData !== null,
-          count: cachedCitiesData?.length ?? 0,
-        })
-      }
-      
-      if (cachedCitiesData) {
-        return cachedCitiesData
-      }
-      
-      // If we don't have cached data but got 304, this shouldn't happen
-      // This indicates the browser sent an If-None-Match header without our cache being populated
-      throw new Error('304 Not Modified received without cached cities. Please refresh the page to fetch fresh data.')
-    }
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -204,7 +187,7 @@ export const fetchCities = async (): Promise<City[]> => {
 
     const cities = items as City[]
     
-    // Cache the cities for future 304 responses
+    // Cache the cities for future use
     cachedCitiesData = cities
     
     if (import.meta.env.DEV) {
@@ -219,15 +202,29 @@ export const fetchCities = async (): Promise<City[]> => {
     
     return cities
   } catch (error) {
+    // If fetch or parsing fails but we have cached data, use it
+    // This handles cases where browser returns 304 as 200 with incomplete/cached response
+    if (cachedCitiesData && cachedCitiesData.length > 0) {
+      if (import.meta.env.DEV) {
+        console.log('[Inventory] Fetch/parse failed, using cached cities from module cache', {
+          error: error instanceof Error ? error.message : error,
+          cachedCount: cachedCitiesData.length,
+          reason: 'Browser may have returned 304 Not Modified as 200 with cached data',
+        })
+      }
+      return cachedCitiesData
+    }
+    
     if (import.meta.env.DEV) {
       console.error('[Inventory] Failed to fetch cities from public API:', {
         error: error instanceof Error ? error.message : error,
         endpoint: PUBLIC_API_ENDPOINT,
         timestamp: new Date().toISOString(),
+        hasCachedData: cachedCitiesData !== null,
       })
     }
     
-    // Re-throw to trigger fallback to static cities in useCities hook
+    // Re-throw to trigger fallback logic in useCities hook
     throw error
   }
 }
