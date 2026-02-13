@@ -68,4 +68,12 @@ export default defineConfig({
       '@': resolve(projectRoot, 'src')
     }
   },
+  // Force fresh build (no module cache issues)
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
+  }
 });
